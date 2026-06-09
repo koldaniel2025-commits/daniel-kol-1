@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SortTube</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --acc:#ff3864;--acc2:#ff6b35;
+  --bg:#09090f;--card:#111118;--border:rgba(255,255,255,.07);
+  --text:#e0e0ee;--sub:#555;
+  --font:'DM Sans',sans-serif;--font-d:'Syne',sans-serif;
+  --safe:env(safe-area-inset-bottom,0px);
+  --cols:1;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-tap-highlight-color:transparent;overflow-x:hidden;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:99px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes menuIn{from{opacity:0;transform:scale(.93) translateY(-4px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:200;background:rgba(9,9,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top,0);}
+.h-inner{display:flex;align-items:center;gap:10px;padding:11px 14px;max-width:1300px;margin:0 auto;}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.logo-name{font-family:var(--font-d);font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.logo-name em{color:var(--acc);font-style:normal;}
+.search-wrap{flex:1;position:relative;}
+.search-wrap input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:9px 34px 9px 34px;color:#fff;font-size:15px;font-family:var(--font);outline:none;direction:rtl;transition:border-color .15s;}
+.search-wrap input:focus{border-color:rgba(255,56,100,.35);}
+.search-wrap input::placeholder{color:#333;}
+.s-icon{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.3;pointer-events:none;}
+.s-clear{position:absolute;left:9px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);border:none;color:#888;cursor:pointer;width:22px;height:22px;border-radius:50%;font-size:11px;display:none;align-items:center;justify-content:center;}
+.s-clear.on{display:flex;}
+.hbtns{display:flex;gap:6px;}
+.hbtn{width:32px;height:32px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:#aaa;}
+.hbtn:active{background:rgba(255,255,255,.1);}
+
+/* ── CATS ── */
+.cats-wrap{padding:12px 14px 0;max-width:1300px;margin:0 auto;position:relative;}
+.cats-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.cats-label{font-size:10px;font-weight:700;color:#333;letter-spacing:2px;text-transform:uppercase;}
+.cat-add-btn{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:7px;padding:4px 10px;color:#777;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);}
+.cats-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
+.cats-row::-webkit-scrollbar{display:none;}
+.cat-btn{display:flex;align-items:center;gap:5px;border:1px solid var(--border);border-radius:50px;padding:6px 13px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--sub);white-space:nowrap;background:rgba(255,255,255,.02);flex-shrink:0;transition:all .15s;}
+.cat-btn.active{color:#fff;border-color:transparent;}
+.cat-badge{font-size:10px;font-weight:800;padding:1px 6px;border-radius:99px;}
+.swipe-cat{display:flex;align-items:center;gap:5px;border:1px solid rgba(255,56,100,.2);border-radius:50px;padding:6px 13px;font-size:13px;font-weight:700;cursor:pointer;color:#ff7070;white-space:nowrap;background:rgba(255,56,100,.06);flex-shrink:0;font-family:var(--font);}
+
+/* ── MAIN ── */
+main{position:relative;z-index:1;padding:14px 14px calc(80px + var(--safe));max-width:1300px;margin:0 auto;}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sec-left{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.sec-title{font-family:var(--font-d);font-size:19px;font-weight:800;color:#fff;}
+.sec-count{font-size:12px;color:#444;}
+.sec-stag{font-size:12px;color:var(--acc);font-weight:600;}
+.sec-right{display:flex;gap:6px;}
+.sort-lbl{font-size:11px;font-weight:700;color:#444;padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;cursor:pointer;font-family:var(--font);}
+
+/* ── GRID ── */
+#grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:10px;}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:visible;animation:cardIn .35s ease both;position:relative;transition:transform .18s,box-shadow .18s,border-color .18s;}
+.card:active{transform:scale(.98);}
+.card-thumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:#0c0c18;cursor:pointer;border-radius:12px 12px 0 0;}
+.card-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+@media(hover:hover){.card:hover .card-thumb img{transform:scale(1.04);}}
+.thumb-ov{position:absolute;inset:0;background:rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;}
+.play-ic{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;padding-left:2px;}
+.card-badge{position:absolute;bottom:6px;right:6px;border-radius:99px;padding:2px 8px;font-size:10px;font-weight:800;color:#000;}
+.short-badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border-radius:5px;padding:2px 6px;font-size:9px;font-weight:800;color:#fff;}
+.card-menu-btn{position:absolute;top:5px;left:5px;z-index:10;width:26px;height:26px;border-radius:7px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;}
+
+/* ── FLOATING PORTAL MENU ── */
+#floating-menu{position:fixed;z-index:9999;background:#16161e;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:5px;min-width:190px;max-height:320px;overflow-y:auto;box-shadow:0 10px 36px rgba(0,0,0,.8);animation:menuIn .13s ease;display:none;}
+#floating-menu.open{display:block;}
+#floating-menu::-webkit-scrollbar{width:2px;}
+.menu-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;color:#ccc;border:none;background:none;width:100%;text-align:right;font-family:var(--font);}
+.menu-item:active{background:rgba(255,255,255,.08);}
+.menu-item.danger{color:#ff5577;}
+.menu-sep{height:1px;background:rgba(255,255,255,.06);margin:3px 0;}
+.submenu{display:none;flex-direction:column;gap:2px;padding:2px 0;}
+.submenu.open{display:flex;}
+.submenu-item{display:flex;align-items:center;gap:7px;padding:7px 11px 7px 18px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;color:#bbb;border:none;background:none;width:100%;text-align:right;font-family:var(--font);}
+.submenu-item:active{background:rgba(255,255,255,.08);}
+.s-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+.card-body{padding:8px 10px 10px;}
+.card-title{font-size:12px;font-weight:600;color:#ccc;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-meta{font-size:10px;color:#444;margin-top:4px;display:flex;gap:8px;}
+
+/* ── EMPTY ── */
+#empty{text-align:center;padding:60px 20px;display:none;animation:fadeUp .4s ease;}
+.empty-dots{display:flex;justify-content:center;gap:8px;margin-bottom:20px;}
+.empty-dot{width:9px;height:9px;border-radius:50%;}
+.empty-h{font-family:var(--font-d);font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;}
+.empty-p{font-size:13px;color:#3a3a4a;line-height:1.7;max-width:260px;margin:0 auto;}
+
+/* ── FAB ── */
+#fab{position:fixed;bottom:calc(20px + var(--safe));left:50%;transform:translateX(-50%) translateX(calc(50% + 5px));z-index:300;display:flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--acc),var(--acc2));border:none;border-radius:50px;padding:13px 24px;color:#fff;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:0 6px 28px #ff386455;white-space:nowrap;animation:fadeUp .5s ease;}
+#fab:active{transform:translateX(-50%) translateX(calc(50% + 5px)) scale(.95);}
+#fab-shorts{position:fixed;bottom:calc(20px + var(--safe));left:calc(50% - 5px);transform:translateX(-100%);z-index:300;display:flex;align-items:center;gap:7px;background:#0f0f18;border:1px solid rgba(255,255,255,.15);border-radius:50px;padding:13px 20px;color:#fff;font-size:14px;font-weight:800;font-family:var(--font);cursor:pointer;box-shadow:0 6px 28px rgba(0,0,0,.4);white-space:nowrap;animation:fadeUp .5s ease;letter-spacing:.3px;}
+#fab-shorts:active{transform:translateX(-100%) scale(.95);}
+@media(min-width:600px){
+  #fab{left:auto;right:calc(24px + 120px);bottom:24px;transform:none;}
+  #fab:active{transform:scale(.96);}
+  #fab-shorts{left:auto;right:24px;bottom:24px;transform:none;}
+  #fab-shorts:active{transform:scale(.96);}
+}
+
+/* ── OVERLAY ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);z-index:400;display:none;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;animation:fadeUp .12s ease;}
+@media(min-width:600px){.overlay{align-items:center;}}
+
+/* ── MODAL ── */
+.modal{background:#12121a;border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;width:100%;box-shadow:0 -12px 50px rgba(0,0,0,.6);overflow:hidden;max-height:92vh;display:flex;flex-direction:column;}
+@media(min-width:600px){.modal{border-radius:18px;max-width:480px;max-height:88vh;}}
+.modal-band{height:3px;background:linear-gradient(90deg,var(--acc),var(--acc2),#b57bee);flex-shrink:0;}
+.drag-handle{width:32px;height:3px;background:rgba(255,255,255,.12);border-radius:99px;margin:10px auto;flex-shrink:0;}
+@media(min-width:600px){.drag-handle{display:none;}}
+.modal-head{padding:14px 20px 12px;border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0;}
+.modal-eyebrow{font-size:9px;font-weight:700;color:var(--acc);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.modal-title-row{display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-family:var(--font-d);font-size:18px;font-weight:800;color:#fff;}
+.x-btn{width:30px;height:30px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07);color:#666;cursor:pointer;font-size:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-scroll{flex:1;overflow-y:auto;padding:16px 20px 20px;}
+.modal-scroll::-webkit-scrollbar{width:2px;}
+.field label{display:block;font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.field input,.field select{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;color:#fff;font-size:15px;font-family:var(--font);outline:none;direction:rtl;transition:border-color .15s;}
+.field input:focus,.field select:focus{border-color:rgba(255,56,100,.35);}
+.field input::placeholder{color:#222;}
+.field+.field{margin-top:12px;}
+.err-box{display:none;align-items:center;gap:7px;background:rgba(255,56,100,.06);border:1px solid rgba(255,56,100,.15);border-radius:9px;padding:9px 12px;color:#ff5577;font-size:12px;font-weight:600;margin-top:10px;}
+.err-box.on{display:flex;}
+.info-box{display:flex;align-items:center;gap:8px;background:rgba(181,123,238,.05);border:1px solid rgba(181,123,238,.1);border-radius:9px;padding:9px 12px;font-size:11px;color:#666;margin-top:10px;}
+.modal-btns{display:flex;gap:8px;margin-top:14px;flex-shrink:0;}
+.btn-cancel{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 16px;color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);}
+.btn-primary{flex:1;background:linear-gradient(135deg,var(--acc),var(--acc2));border:none;border-radius:10px;padding:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 3px 14px #ff386430;}
+.btn-primary:disabled{opacity:.5;cursor:wait;}
+.spin{display:inline-flex;align-items:center;gap:6px;}
+.spin-i{animation:spin 1s linear infinite;display:inline-block;}
+
+/* ── TITLE PICKER ── */
+.title-opts{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.title-opt{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:11px;cursor:pointer;border:2px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);}
+.title-opt.chosen{border-color:var(--acc);background:rgba(255,56,100,.06);}
+.t-dot{width:16px;height:16px;border-radius:50%;border:2px solid #333;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;}
+.title-opt.chosen .t-dot{border-color:var(--acc);background:var(--acc);}
+.t-dot-in{width:6px;height:6px;border-radius:50%;background:#fff;opacity:0;}
+.title-opt.chosen .t-dot-in{opacity:1;}
+.t-body{flex:1;}
+.t-lbl{font-size:9px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.t-text{font-size:14px;font-weight:600;color:#555;line-height:1.4;}
+.title-opt.chosen .t-text{color:#fff;}
+.t-input{background:none;border:none;outline:none;color:#fff;font-size:14px;font-weight:600;font-family:var(--font);width:100%;padding:0;margin-top:2px;}
+.t-input::placeholder{color:#222;}
+
+/* ── PREVIEW BOX ── */
+#tp{display:none;align-items:center;gap:9px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;padding:9px 12px;margin-top:10px;}
+
+/* ── LIGHTBOX ── */
+#lb-overlay{align-items:center!important;}
+#lb-overlay .modal{max-width:860px;padding:0;background:#000;border-radius:14px!important;}
+.lb-head{display:flex;align-items:center;gap:9px;padding:10px 14px;background:rgba(9,9,15,.98);border-bottom:1px solid var(--border);}
+.lb-tag{border-radius:99px;padding:2px 9px;font-size:10px;font-weight:800;flex-shrink:0;color:#000;}
+.lb-title{flex:1;font-size:12px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lb-fs{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:14px;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lb-frame{position:relative;padding-bottom:56.25%;height:0;background:#000;}
+.lb-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+
+/* ── SWIPE MODE ── */
+#swipe-mode{position:fixed;inset:0;z-index:600;background:#000;display:none;flex-direction:column;}
+#swipe-mode.open{display:flex;}
+.sw-header{position:absolute;top:0;left:0;right:0;z-index:10;padding:env(safe-area-inset-top,10px) 14px 10px;background:linear-gradient(to bottom,rgba(0,0,0,.75),transparent);display:flex;align-items:center;justify-content:space-between;}
+.sw-title{font-family:var(--font-d);font-size:14px;font-weight:800;color:#fff;}
+.sw-close{width:32px;height:32px;background:rgba(255,255,255,.12);border:none;border-radius:50%;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.sw-container{flex:1;overflow:hidden;position:relative;}
+.sw-item{position:absolute;inset:0;transition:transform .32s cubic-bezier(.4,0,.2,1);}
+.sw-item iframe{width:100%;height:100%;border:none;}
+.sw-ov{position:absolute;bottom:0;left:0;right:0;padding:50px 16px 16px;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);pointer-events:none;}
+.sw-ov-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:5px;line-height:1.4;}
+.sw-ov-cat{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:3px 10px;font-size:11px;font-weight:800;color:#000;}
+.sw-dots{position:absolute;top:50%;right:12px;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;}
+.sw-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);}
+.sw-dot.active{background:#fff;height:18px;border-radius:3px;}
+.sw-counter{position:absolute;bottom:16px;right:16px;background:rgba(0,0,0,.6);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#fff;}
+
+/* ── SETTINGS ── */
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.set-row:last-child{border-bottom:none;}
+.set-lbl{font-size:13px;font-weight:600;color:#ddd;}
+.set-sub{font-size:11px;color:#444;margin-top:2px;}
+.cols-pick{display:flex;gap:6px;}
+.col-opt{width:34px;height:34px;border-radius:9px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#555;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font);}
+.col-opt.active{border-color:var(--acc);background:rgba(255,56,100,.1);color:#fff;}
+.sort-btns{display:flex;gap:5px;}
+.sort-opt{padding:6px 11px;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#555;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);}
+.sort-opt.active{border-color:var(--acc);background:rgba(255,56,100,.1);color:#fff;}
+.key-row{display:flex;gap:6px;}
+.key-row input{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:#fff;font-size:13px;font-family:var(--font);outline:none;}
+.key-save{background:linear-gradient(135deg,#26de81,#00c2ff);border:none;border-radius:9px;padding:9px 14px;color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap;}
+
+/* ── IMPORT ── */
+.itype-row{display:flex;gap:7px;}
+.itype-btn{flex:1;padding:9px 6px;border-radius:10px;border:2px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);color:#555;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);text-align:center;transition:all .15s;}
+.itype-btn span{font-size:18px;display:block;margin-bottom:3px;}
+.itype-btn.active{border-color:var(--acc);background:rgba(255,56,100,.08);color:#fff;}
+.prog-wrap{background:rgba(255,255,255,.07);border-radius:99px;height:5px;overflow:hidden;margin-top:6px;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:99px;transition:width .25s;}
+.imp-status{font-size:12px;color:#666;margin-top:6px;}
+.imp-results{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-height:300px;overflow-y:auto;}
+.imp-results::-webkit-scrollbar{width:2px;}
+.res-item{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.res-thumb{width:54px;height:30px;object-fit:cover;border-radius:5px;flex-shrink:0;}
+.res-title{font-size:11px;font-weight:600;color:#bbb;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* ── CAT MODAL ── */
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;}
+.emoji-opt{width:34px;height:34px;border-radius:8px;border:2px solid transparent;background:rgba(255,255,255,.04);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;}
+.emoji-opt.sel{border-color:var(--acc);background:rgba(255,56,100,.1);}
+.color-grid{display:flex;gap:7px;flex-wrap:wrap;}
+.color-sw{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;flex-shrink:0;}
+.color-sw.sel{border-color:#fff;}
+.cat-preview{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:7px 16px;font-size:13px;font-weight:700;color:#000;}
+.cc-item{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;padding:9px 12px;}
+.cc-del{background:none;border:none;color:#444;cursor:pointer;font-size:14px;padding:2px 5px;border-radius:5px;}
+
+/* THEME OPTS */
+.theme-opt{background:rgba(255,255,255,.04);border:2px solid var(--border);border-radius:10px;padding:9px 6px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);color:var(--sub);text-align:center;transition:all .15s;}
+.theme-opt:active{transform:scale(.97);}
+.shorts-feed-btn{display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#ff3864,#ff6b35);border:none;border-radius:7px;padding:5px 11px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:var(--font);letter-spacing:.3px;box-shadow:0 2px 10px #ff386440;}
+.shorts-feed-btn:active{transform:scale(.95);}
+
+/* ── SHORTS FEED (TikTok style) ── */
+#shorts-feed{position:fixed;inset:0;z-index:700;background:#000;display:none;flex-direction:column;}
+#shorts-feed.open{display:flex;}
+.sf-header{position:absolute;top:0;left:0;right:0;z-index:20;padding:env(safe-area-inset-top,12px) 14px 12px;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);display:flex;align-items:center;justify-content:space-between;}
+.sf-title{font-family:var(--font-d);font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px;}
+.sf-close{width:34px;height:34px;background:rgba(255,255,255,.14);border:none;border-radius:50%;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.sf-container{flex:1;overflow:hidden;position:relative;}
+.sf-item{position:absolute;inset:0;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.sf-item iframe{width:100%;height:100%;border:none;}
+.sf-bottom{position:absolute;bottom:0;left:0;right:0;z-index:20;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 14px);background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 100%);padding-top:60px;}
+.sf-vid-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:10px;line-height:1.4;pointer-events:none;}
+.sf-actions{display:flex;gap:10px;align-items:center;}
+.sf-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;border-radius:50px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:transform .15s;}
+.sf-btn:active{transform:scale(.95);}
+.sf-channel-btn{background:linear-gradient(135deg,#ff3864,#ff6b35);color:#fff;box-shadow:0 3px 14px #ff386450;}
+.sf-save-btn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);}
+.sf-save-btn.saved{background:linear-gradient(135deg,#26de81,#00c2ff);color:#000;border:none;}
+.sf-counter{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);right:16px;background:rgba(0,0,0,.6);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#fff;pointer-events:none;}
+.sf-dots{position:absolute;top:50%;right:12px;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;}
+.sf-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);}
+.sf-dot.active{background:#fff;height:18px;border-radius:3px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1c1c26;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 18px;color:#fff;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .2s;white-space:nowrap;pointer-events:none;}
+
+/* NOTIFICATIONS */
+.notif-btn{position:relative;}
+.notif-badge{position:absolute;top:-5px;left:-5px;background:#ff3864;color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:99px;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg);z-index:10;}
+.notif-badge.show{display:flex;}
+#notif-panel{position:fixed;top:0;right:0;bottom:0;width:100%;max-width:360px;background:#0f0f18;border-left:1px solid var(--border);z-index:600;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+#notif-panel.open{transform:translateX(0);}
+.np-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0;background:rgba(9,9,15,.95);}
+.np-title{font-family:var(--font-d);font-size:17px;font-weight:800;color:#fff;}
+.np-clear{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:7px;padding:5px 11px;color:#888;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);}
+.np-list{flex:1;overflow-y:auto;padding:12px;}
+.np-list::-webkit-scrollbar{width:2px;}
+.np-group{margin-bottom:16px;}
+.np-ch-name{font-size:11px;font-weight:700;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+.np-ch-avatar{width:20px;height:20px;border-radius:50%;object-fit:cover;}
+.np-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:6px;cursor:pointer;transition:background .15s;}
+.np-item:active{background:rgba(255,255,255,.08);}
+.np-item.new{border-color:rgba(255,56,100,.25);background:rgba(255,56,100,.05);}
+.np-thumb{width:50px;height:28px;object-fit:cover;border-radius:5px;flex-shrink:0;}
+.np-info{flex:1;}
+.np-vid-title{font-size:12px;font-weight:600;color:#ddd;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.np-vid-meta{font-size:10px;color:#555;margin-top:2px;}
+.np-new-dot{width:7px;height:7px;border-radius:50%;background:#ff3864;flex-shrink:0;}
+.np-empty{text-align:center;padding:50px 20px;color:#444;font-size:13px;}
+.np-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:599;display:none;}
+.np-overlay.open{display:block;}
+.np-checking{display:flex;align-items:center;gap:8px;padding:12px;font-size:12px;color:#555;}
+.np-spin{animation:spin 1s linear infinite;display:inline-block;}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.tab{flex:1;padding:11px 8px;font-size:13px;font-weight:700;color:#444;cursor:pointer;text-align:center;border:none;background:none;font-family:var(--font);border-bottom:2px solid transparent;transition:all .18s;}
+.tab.active{color:#fff;border-bottom-color:var(--acc);}
+.tab:active{color:#ccc;}
+
+/* CHANNELS GRID */
+#ch-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(min-width:500px){#ch-grid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:900px){#ch-grid{grid-template-columns:repeat(4,1fr);}}
+.ch-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;position:relative;transition:all .15s;}
+.ch-card:active{transform:scale(.97);}
+@media(hover:hover){.ch-card:hover{border-color:rgba(255,255,255,.15);}}
+.ch-avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--border);}
+.ch-name{font-size:12px;font-weight:700;color:#ddd;text-align:center;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ch-count{font-size:10px;color:#555;}
+.ch-del{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.6);border:none;border-radius:5px;color:#888;cursor:pointer;font-size:11px;padding:2px 5px;}
+.ch-more-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:8px 14px;color:#888;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);width:100%;margin-top:4px;}
+
+/* CHANNEL VIEW */
+#ch-view{display:none;}
+.ch-view-header{display:flex;align-items:center;gap:12px;padding:0 0 14px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.ch-view-back{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:#aaa;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);flex-shrink:0;}
+.ch-view-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.ch-view-info{flex:1;}
+.ch-view-name{font-size:15px;font-weight:700;color:#fff;}
+.ch-view-sub{font-size:11px;color:#555;margin-top:2px;}
+.ch-load-more{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px;color:#888;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);width:100%;margin-top:12px;}
+
+/* CH EMPTY */
+#ch-empty{text-align:center;padding:50px 20px;display:none;}
+.ch-empty-h{font-family:var(--font-d);font-size:18px;font-weight:800;color:#fff;margin-bottom:8px;}
+.ch-empty-p{font-size:13px;color:#3a3a4a;line-height:1.6;}
+
+@media(min-width:600px){
+  .cats-wrap,.main-wrap{max-width:1300px;margin:0 auto;}
+  main{max-width:1300px;margin:0 auto;padding:14px 24px calc(70px + var(--safe));}
+  .h-inner{padding:0 24px;height:60px;}
+  .cats-wrap{padding:18px 24px 0;}
+  #grid{gap:14px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-inner">
+    <div class="logo">
+      <div class="logo-mark">▶</div>
+      <div>
+        <div class="logo-name"><em>Sort</em>Tube</div>
+        <div id="logo-count" style="font-size:9px;color:#444;font-weight:600;letter-spacing:.5px;margin-top:-1px;"></div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <span class="s-icon">⌕</span>
+      <input type="text" id="search" placeholder="חפש סרטון..." autocomplete="off">
+      <button class="s-clear" id="s-clear">✕</button>
+    </div>
+    <div class="hbtns">
+      <div class="hbtn" onclick="openImport()" title="ייבוא">📥</div>
+      <div class="hbtn notif-btn" onclick="openNotifPanel()" title="התראות">
+        🔔
+        <div class="notif-badge" id="notif-badge">0</div>
+      </div>
+      <div class="hbtn" onclick="openSettings()" title="הגדרות">⚙️</div>
+    </div>
+  </div>
+</header>
+
+<div class="cats-wrap">
+  <div class="cats-top">
+    <div class="cats-label">קטגוריות</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="shorts-feed-btn" onclick="openShortsFeed()">▶ SHORTS</button>
+      <button class="cat-add-btn" onclick="openCatModal()">＋ קטגוריה</button>
+    </div>
+  </div>
+  <div class="cats-row" id="cats-row"></div>
+</div>
+
+<main>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" id="tab-videos" onclick="switchTab('videos')">🎬 סרטונים</button>
+    <button class="tab" id="tab-shorts" onclick="switchTab('shorts')">📱 שורטים</button>
+    <button class="tab" id="tab-channels" onclick="switchTab('channels')">📺 ערוצים</button>
+  </div>
+
+  <!-- VIDEOS TAB -->
+  <div id="tab-content-videos">
+  <div class="sec-head">
+    <div class="sec-left">
+      <div class="sec-title" id="sec-title">כל הסרטונים</div>
+      <span class="sec-stag" id="sec-stag" style="display:none"></span>
+      <span class="sec-count" id="sec-count"></span>
+    </div>
+    <div class="sec-right">
+      <div class="sort-lbl" id="sort-lbl" onclick="cycleSortMode()">↕ חדש</div>
+    </div>
+  </div>
+  <div id="grid"></div>
+  <div id="empty">
+    <div class="empty-dots" id="empty-dots"></div>
+    <div class="empty-h" id="empty-h">עוד אין סרטונים</div>
+    <div class="empty-p" id="empty-p">לחץ על הכפתור למטה</div>
+  </div>
+  </div><!-- end videos tab -->
+
+  <!-- SHORTS TAB -->
+  <div id="tab-content-shorts" style="display:none">
+    <div class="sec-head">
+      <div class="sec-left">
+        <div class="sec-title">📱 שורטים</div>
+        <span class="sec-count" id="shorts-count"></span>
+      </div>
+      <div class="sec-right">
+        <div class="sort-lbl" onclick="cycleSortMode()">↕ <span id="shorts-sort-lbl">חדש</span></div>
+      </div>
+    </div>
+    <div id="shorts-grid" style="display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:10px;"></div>
+    <div id="shorts-empty" style="display:none;text-align:center;padding:40px 20px;">
+      <div style="font-size:36px;margin-bottom:12px;">📱</div>
+      <div style="font-family:var(--font-d);font-size:18px;font-weight:800;color:#fff;margin-bottom:8px;">אין שורטים עדיין</div>
+      <div style="font-size:13px;color:#3a3a4a;line-height:1.6;">ייבא ערוץ ובחר "שורטים" כדי להוסיף</div>
+    </div>
+    <!-- Channels section inside shorts tab -->
+    <div id="shorts-channels-section" style="margin-top:24px;">
+      <div style="font-size:11px;font-weight:700;color:#333;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;padding-top:16px;border-top:1px solid var(--border);">📺 ערוצים</div>
+      <div id="shorts-ch-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div>
+      <div id="shorts-ch-empty" style="display:none;font-size:13px;color:#444;padding:12px 0;">אין ערוצים עדיין</div>
+    </div>
+  </div>
+
+  <!-- CHANNELS TAB -->
+  <div id="tab-content-channels" style="display:none">
+    <!-- Channel detail view -->
+    <div id="ch-view">
+      <div class="ch-view-header">
+        <button class="ch-view-back" onclick="closeChView()">← חזור</button>
+        <img class="ch-view-avatar" id="cv-avatar" src="" alt="">
+        <div class="ch-view-info">
+          <div class="ch-view-name" id="cv-name"></div>
+          <div class="ch-view-sub" id="cv-sub"></div>
+        </div>
+        <div class="hbtn" onclick="loadMoreChVideos()" title="טען עוד">+</div>
+      </div>
+      <!-- filter tabs inside channel view -->
+      <div style="display:flex;gap:7px;margin-bottom:12px;" id="cv-filter-row">
+        <button class="itype-btn active" id="cvf-all" onclick="setCvFilter('all')" style="flex:none;padding:6px 14px;"><span></span>הכל</button>
+        <button class="itype-btn" id="cvf-videos" onclick="setCvFilter('videos')" style="flex:none;padding:6px 14px;"><span></span>🎬 סרטונים</button>
+        <button class="itype-btn" id="cvf-shorts" onclick="setCvFilter('shorts')" style="flex:none;padding:6px 14px;"><span></span>📱 שורטים</button>
+      </div>
+      <div id="cv-grid" style="display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:10px;"></div>
+      <button class="ch-load-more" id="cv-load-more" onclick="loadMoreChVideos()" style="display:none">⬇ טען עוד סרטונים</button>
+    </div>
+    <!-- Channels grid -->
+    <div id="ch-main">
+      <div id="ch-empty">
+        <div class="ch-empty-h">אין ערוצים עדיין</div>
+        <div class="ch-empty-p">לחץ 📥 ויבא ערוץ ראשון</div>
+      </div>
+      <div id="ch-grid"></div>
+    </div>
+  </div>
+</main>
+
+<button id="fab" onclick="onFabClick()"><span style="font-size:18px;font-weight:300">＋</span> <span id="fab-label">הוסף סרטון</span></button>
+<button id="fab-shorts" onclick="openShortsFeed()">▶ SHORTS</button>
+<div id="toast"></div>
+<div id="floating-menu"></div>
+
+<!-- SHORTS FEED (TikTok style) -->
+<div id="shorts-feed">
+  <div class="sf-header">
+    <div class="sf-title">📱 SHORTS</div>
+    <button class="sf-close" onclick="closeShortsFeed()">✕</button>
+  </div>
+  <div class="sf-container" id="sf-container">
+    <div class="sf-dots" id="sf-dots"></div>
+  </div>
+</div>
+
+<!-- SWIPE -->
+<div id="swipe-mode">
+  <div class="sw-header">
+    <div class="sw-title" id="sw-title">מצב גלילה</div>
+    <button class="sw-close" onclick="closeSwipe()">✕</button>
+  </div>
+  <div class="sw-container" id="sw-container">
+    <div class="sw-dots" id="sw-dots"></div>
+    <div class="sw-counter" id="sw-counter"></div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-band"></div><div class="drag-handle"></div>
+    <div class="modal-head">
+      <div class="modal-eyebrow">סרטון חדש</div>
+      <div class="modal-title-row">
+        <div class="modal-title">הוספת סרטון</div>
+        <button class="x-btn" onclick="closeAdd()">✕</button>
+      </div>
+    </div>
+    <div class="modal-scroll">
+      <div id="step1">
+        <div class="field">
+          <label>קישור יוטיוב *</label>
+          <input type="url" id="in-url" placeholder="https://youtube.com/watch?v=..." dir="ltr" inputmode="url">
+        </div>
+        <div id="tp">
+          <span id="tp-icon" style="font-size:15px;flex-shrink:0">🎬</span>
+          <span id="tp-text" style="font-size:12px;color:#aaa;"></span>
+        </div>
+        <div class="err-box" id="add-err">⚠️ <span id="err-txt"></span></div>
+        <div class="info-box"><span style="font-size:16px">🤖</span><span>ה-AI ישלוף כותרת ויתרגם לעברית אוטומטית</span></div>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeAdd()">ביטול</button>
+          <button class="btn-primary" id="btn-fetch" onclick="doFetch()">המשך ←</button>
+        </div>
+      </div>
+      <div id="step2" style="display:none">
+        <div style="font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;">בחר שם לסרטון</div>
+        <div class="title-opts">
+          <div class="title-opt chosen" id="opt-he" onclick="selTitle('he')">
+            <div class="t-dot"><div class="t-dot-in"></div></div>
+            <div class="t-body"><div class="t-lbl">🇮🇱 עברית — מתורגם</div><div class="t-text" id="txt-he">...</div></div>
+          </div>
+          <div class="title-opt" id="opt-orig" onclick="selTitle('orig')">
+            <div class="t-dot"><div class="t-dot-in"></div></div>
+            <div class="t-body"><div class="t-lbl">🌐 מקורי — נקי</div><div class="t-text" id="txt-orig">...</div></div>
+          </div>
+          <div class="title-opt" id="opt-manual" onclick="selTitle('manual')">
+            <div class="t-dot"><div class="t-dot-in"></div></div>
+            <div class="t-body"><div class="t-lbl">✏️ ידני</div><input class="t-input" id="in-manual" placeholder="כתוב שם משלך..." autocomplete="off" onclick="event.stopPropagation();selTitle('manual')" oninput="selTitle('manual')"></div>
+          </div>
+        </div>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="goStep(1)">← חזור</button>
+          <button class="btn-primary" id="btn-add" onclick="doAdd()">＋ הוסף</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="overlay" id="lb-overlay">
+  <div class="modal" style="max-width:860px;padding:0;background:#000;border-radius:14px;overflow:hidden;">
+    <div class="lb-head">
+      <div class="lb-tag" id="lb-tag"></div>
+      <div class="lb-title" id="lb-title"></div>
+      <button class="lb-fs" onclick="goFS()">⛶</button>
+      <button class="x-btn" onclick="closeLB()">✕</button>
+    </div>
+    <div class="lb-frame"><iframe id="lb-iframe" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;fullscreen" allowfullscreen></iframe></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="overlay" id="settings-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-band" style="background:linear-gradient(90deg,#00c2ff,#26de81,#b57bee)"></div>
+    <div class="drag-handle"></div>
+    <div class="modal-head">
+      <div class="modal-eyebrow">אפליקציה</div>
+      <div class="modal-title-row"><div class="modal-title">⚙️ הגדרות</div><button class="x-btn" onclick="closeSettings()">✕</button></div>
+    </div>
+    <div class="modal-scroll">
+      <div class="set-row">
+        <div><div class="set-lbl">עמודות</div><div class="set-sub">סרטונים בכל שורה</div></div>
+        <div class="cols-pick" id="cols-pick">
+          <button class="col-opt active" onclick="setCols(1)">1</button>
+          <button class="col-opt" onclick="setCols(2)">2</button>
+          <button class="col-opt" onclick="setCols(3)">3</button>
+          <button class="col-opt" onclick="setCols(4)">4</button>
+        </div>
+      </div>
+      <div class="set-row">
+        <div><div class="set-lbl">מיון</div></div>
+        <div class="sort-btns">
+          <button class="sort-opt active" id="srt-new" onclick="setSort('new')">חדש</button>
+          <button class="sort-opt" id="srt-old" onclick="setSort('old')">ישן</button>
+          <button class="sort-opt" id="srt-az" onclick="setSort('az')">א-ת</button>
+        </div>
+      </div>
+      <div class="set-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+        <div><div class="set-lbl">🔑 YouTube API Key</div><div class="set-sub">לייבוא ערוצים ופלייליסטים</div></div>
+        <div class="key-row">
+          <input type="password" id="key-input" placeholder="AIzaSy..." dir="ltr">
+          <button class="key-save" onclick="saveKey()">שמור</button>
+        </div>
+        <div id="key-status" style="font-size:11px;color:#444;"></div>
+      </div>
+      <div class="set-row">
+        <div><div class="set-lbl">📊 סטטיסטיקה</div><div class="set-sub" id="stats-txt"></div></div>
+      </div>
+      <!-- SAVED SHORTS row - opens modal -->
+      <div class="set-row" style="cursor:pointer;" onclick="openSavedShortsModal()">
+        <div><div class="set-lbl">🔖 שמירות</div><div class="set-sub" id="saved-shorts-count">0 שורטים שמורים</div></div>
+        <div style="color:#555;font-size:18px;">›</div>
+      </div>
+      <div class="set-row">
+        <div><div class="set-lbl" style="color:#ff5577">מחק הכל</div></div>
+        <button onclick="deleteAll()" style="background:rgba(255,56,100,.08);border:1px solid rgba(255,56,100,.18);border-radius:8px;padding:7px 12px;color:#ff5577;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">מחק</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SAVED SHORTS MODAL -->
+<div class="overlay" id="saved-shorts-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-band" style="background:linear-gradient(90deg,#26de81,#00c2ff,#b57bee)"></div>
+    <div class="drag-handle"></div>
+    <div class="modal-head">
+      <div class="modal-eyebrow">שמירות</div>
+      <div class="modal-title-row">
+        <div class="modal-title">🔖 שמירות</div>
+        <div style="display:flex;gap:7px;align-items:center;">
+          <button onclick="clearSavedShorts()" style="background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:7px;padding:5px 11px;color:#888;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);">נקה הכל</button>
+          <button class="x-btn" onclick="closeSavedShortsModal()">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-scroll">
+      <div id="saved-shorts-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="saved-shorts-empty" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:36px;margin-bottom:12px;">🔖</div>
+        <div style="font-family:var(--font-d);font-size:17px;font-weight:800;color:#fff;margin-bottom:8px;">אין שמירות עדיין</div>
+        <div style="font-size:13px;color:#3a3a4a;line-height:1.6;">בזמן שאתה גולל שורטים,<br>לחץ 🔖 שמור כדי לשמור</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT -->
+<div class="overlay" id="import-modal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-band" style="background:linear-gradient(90deg,#ff9f43,#ffd32a,#26de81)"></div>
+    <div class="drag-handle"></div>
+    <div class="modal-head">
+      <div class="modal-eyebrow">ייבוא</div>
+      <div class="modal-title-row"><div class="modal-title">📥 ייבוא ערוץ / פלייליסט</div><button class="x-btn" onclick="closeImport()">✕</button></div>
+    </div>
+    <div class="modal-scroll">
+      <div class="field">
+        <label>קישור ערוץ או פלייליסט</label>
+        <input type="url" id="imp-url" placeholder="https://youtube.com/@channel..." dir="ltr" inputmode="url">
+      </div>
+      <div style="margin-top:12px;">
+        <div style="font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px;">מה לייבא?</div>
+        <div class="itype-row">
+          <button class="itype-btn active" id="itype-videos" onclick="setIT('videos')"><span>🎬</span>סרטונים</button>
+          <button class="itype-btn" id="itype-shorts" onclick="setIT('shorts')"><span>📱</span>שורטים</button>
+          <button class="itype-btn" id="itype-all" onclick="setIT('all')"><span>🎯</span>הכל</button>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div style="font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px;">כמה לייבא?</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <input type="number" id="imp-max" value="20" min="1" max="10000" dir="ltr"
+            style="width:80px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:8px 10px;color:#fff;font-size:14px;font-family:var(--font);outline:none;">
+          <button onclick="document.getElementById('imp-max').value=10000;document.getElementById('imp-max').style.opacity='.5'"
+            style="background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:#aaa;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">
+            כל הסרטונים
+          </button>
+        </div>
+      </div>
+      <div id="imp-no-key" style="display:flex;align-items:center;gap:8px;background:rgba(255,152,0,.06);border:1px solid rgba(255,152,0,.18);border-radius:9px;padding:9px 12px;font-size:12px;color:#ff9f43;margin-top:10px;">
+        <span>⚠️</span><span>צריך API Key בהגדרות ⚙️ כדי לייבא</span>
+      </div>
+      <div id="imp-progress" style="display:none;margin-top:10px;">
+        <div class="imp-status" id="imp-status">מתחיל...</div>
+        <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+      </div>
+      <div class="imp-results" id="imp-results"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeImport()">סגור</button>
+        <button class="btn-primary" id="btn-imp" onclick="doImportWithChannel()" style="background:linear-gradient(135deg,#ff9f43,#ffd32a);color:#000;">📥 ייבא</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAT MODAL -->
+<div class="overlay" id="cat-modal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-band" style="background:linear-gradient(90deg,#26de81,#00c2ff,#b57bee)"></div>
+    <div class="drag-handle"></div>
+    <div class="modal-head">
+      <div class="modal-eyebrow">קטגוריות</div>
+      <div class="modal-title-row"><div class="modal-title">ניהול קטגוריות</div><button class="x-btn" onclick="closeCatModal()">✕</button></div>
+    </div>
+    <div class="modal-scroll">
+      <div id="cc-wrap" style="display:none">
+        <div style="font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">הקטגוריות שלך</div>
+        <div id="cc-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div style="height:1px;background:rgba(255,255,255,.06);margin:14px 0"></div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">הוסף קטגוריה חדשה</div>
+      <div class="field"><label>שם</label><input type="text" id="cat-name" placeholder="למשל: ספורט, בישול..." autocomplete="off" oninput="updateCatPrev()"></div>
+      <div style="margin-top:12px;"><div style="font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">אימוג'י</div><div class="emoji-grid" id="emoji-grid"></div></div>
+      <div style="margin-top:12px;"><div style="font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">צבע</div><div class="color-grid" id="color-grid"></div></div>
+      <div style="margin-top:12px;"><div style="font-size:10px;font-weight:700;color:#444;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;">תצוגה מקדימה</div><div class="cat-preview" id="cat-prev">🎯 חדש</div></div>
+      <div class="err-box" id="cat-err">⚠️ <span id="cat-err-txt"></span></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeCatModal()">סגור</button>
+        <button class="btn-primary" onclick="addCC()" style="background:linear-gradient(135deg,#26de81,#00c2ff);color:#000;">＋ הוסף</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIF OVERLAY -->
+<div class="np-overlay" id="np-overlay" onclick="closeNotifPanel()"></div>
+
+<!-- NOTIF PANEL -->
+<div id="notif-panel">
+  <div class="np-head">
+    <div class="np-title">🔔 התראות</div>
+    <button class="np-clear" onclick="clearNotifs()">נקה הכל</button>
+    <button class="x-btn" onclick="closeNotifPanel()">✕</button>
+  </div>
+  <div id="np-checking" class="np-checking" style="display:none">
+    <span class="np-spin">⟳</span> בודק עדכונים...
+  </div>
+  <div class="np-list" id="np-list">
+    <div class="np-empty">אין התראות חדשות</div>
+  </div>
+</div>
+
+<script>
+const SK='sorttube-v2',CCK='sorttube-cc',SETK='sorttube-set',YTK='sorttube-ytkey';
+const BASE=[
+  {id:'gaming',emoji:'🎮',label:'גיימינג',  color:'#ff3864',glow:'#ff386455'},
+  {id:'magic', emoji:'✨',label:'קסמים',    color:'#b57bee',glow:'#b57bee44'},
+  {id:'vlogs', emoji:'📹',label:'ולוגים',   color:'#00c2ff',glow:'#00c2ff44'},
+  {id:'music', emoji:'🎵',label:'מוזיקה',   color:'#ff9f43',glow:'#ff9f4344'},
+  {id:'tech',  emoji:'💻',label:'טכנולוגיה',color:'#26de81',glow:'#26de8144'},
+  {id:'funny', emoji:'😂',label:'מצחיק',    color:'#ffd32a',glow:'#ffd32a44'},
+  {id:'other', emoji:'📦',label:'אחר',      color:'#a4b0be',glow:'#a4b0be33'},
+];
+const EMOJIS=['🎯','⚽','🏀','🎾','🥊','🏊','🚴','🧘','🍕','🍣','🍔','☕','🎨','📸','✏️','📚','🌍','🏔','🏖','🌸','🐶','🐱','🦁','🦋','🚀','✈️','🏎','⚡','💎','🔥','🌈','👑'];
+const COLORS=['#ff3864','#ff6b35','#ff9f43','#ffd32a','#26de81','#00c2ff','#b57bee','#fd79a8','#00cec9','#6c5ce7','#a29bfe','#74b9ff','#55efc4','#fdcb6e','#e17055','#d63031'];
+
+let videos=[],cc=[],activeCat='all',searchQ='';
+let selE=EMOJIS[0],selC=COLORS[0],curLbId=null;
+let pVid=null,pUrl='',pOrig='',pHe='',chosenT='he';
+let cfg={cols:1,sort:'new'};
+let swVids=[],swIdx=0,impType='videos';
+
+function load(){try{videos=JSON.parse(localStorage.getItem(SK)||'[]');}catch{videos=[];}}
+function save(){localStorage.setItem(SK,JSON.stringify(videos));}
+function loadCC(){try{cc=JSON.parse(localStorage.getItem(CCK)||'[]');}catch{cc=[];}}
+function saveCC(){localStorage.setItem(CCK,JSON.stringify(cc));}
+function loadCfg(){try{cfg={...cfg,...JSON.parse(localStorage.getItem(SETK)||'{}') };}catch{}}
+function saveCfg(){localStorage.setItem(SETK,JSON.stringify(cfg));}
+function getKey(){return localStorage.getItem(YTK)||'';}
+function allCats(){return[...BASE,...cc];}
+function ytId(u){const m=u.match(/(?:v=|\/embed\/|\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:null;}
+function thumb(id){return`https://img.youtube.com/vi/${id}/mqdefault.jpg`;}
+
+// ── AI ──
+async function ai(prompt,max=150){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:max,messages:[{role:'user',content:prompt}]})
+  });
+  const d=await r.json();
+  return(d.content?.[0]?.text||'').trim();
+}
+
+async function fetchTitle(id){
+  try{const r=await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`);
+    if(r.ok){const d=await r.json();if(d.title)return d.title;}}catch{}return null;
+}
+
+function clean(t){
+  return t.replace(/#\S+/g,'').replace(/[\[\(][^\]\)]*[\]\)]/g,' ').replace(/\|.*/g,'')
+    .replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'')
+    .replace(/[-–—]+$/,'').replace(/^[-–—]+/,'').replace(/\s+/g,' ').trim();
+}
+
+async function translate(title){
+  try{
+    const r=await ai('תרגם את כותרת הסרטון הבאה לעברית טבעית. החזר רק את התרגום בעברית, ללא מרכאות, ללא הסבר. שמות פרטיים ומותגים תשאיר כמו שהם.\nכותרת: '+title,120);
+    if(r&&r.length>1)return r;
+  }catch(e){console.error(e);}
+  return title;
+}
+
+async function classify(title){
+  const t=title.toLowerCase();
+  const kw={
+    magic:['фокус','фокусник','магия','иллюзия','трюк','волшебник','קסם','קוסם','מאגיה','אשליה','טריק','magic','trick','illusion','magician','wizard','spell'],
+    gaming:['игра','игры','gameplay','gaming','minecraft','fortnite','roblox','esport','משחק','game','lets play','playthrough','fps','rpg','גיימינג','פורטנייט','רובלוקס','ליג','cs2','gta','valorant','pubg'],
+    music:['музыка','песня','клип','music','song','beat','album','track','מוזיקה','שיר','קליפ','זמר','ריפ','rap','hip hop','ביט','להיט','ורסוס','freestyle','mixtape'],
+    tech:['программирование','tutorial','review','programming','coding','software','hardware','javascript','python','react','טכנולוגיה','קוד','תכנות','הדרכה','אפליקציה','סמארטפון','אייפון','אנדרואיד','מחשב','לפטופ','ai','chatgpt'],
+    funny:['смешно','розыгрыш','приколы','comedy','prank','fail','meme','funny','lol','מצחיק','תעלול','פרנק','בדיחה','הומור','כישלון','bloopers','challenge','ריאקשן','reaction','prank'],
+    vlogs:['влог','vlog','день','жизнь','путешествие','daily','day in','routine','travel','lifestyle','ולוג','יום','חיים','טיול','שגרה','יומי','הרפתקה','סיור','עם המשפחה','בחיים'],
+  };
+  for(const[cat,words]of Object.entries(kw)){if(words.some(w=>t.includes(w)))return cat;}
+  for(const c of cc){if(t.includes(c.label.toLowerCase()))return c.id;}
+  // use AI with a much richer prompt
+  try{
+    const cats=allCats().map(c=>`${c.id} (${c.label})`).join(', ');
+    const r=await ai(
+      `You are a YouTube video categorizer. Given the title below, pick the SINGLE most fitting category.\n\nAvailable categories: ${cats}\n\nRules:\n- "funny/מצחיק" for pranks, fails, reactions, challenges, comedy\n- "vlogs/ולוגים" for daily life, travel, routines, family\n- "gaming/גיימינג" for any video game content\n- "music/מוזיקה" for songs, beats, rap, music videos\n- "tech/טכנולוגיה" for tech reviews, tutorials, coding\n- "magic/קסמים" for magic tricks and illusions\n- Use custom categories if they clearly fit better\n- Reply with ONLY the category id, nothing else\n\nVideo title: "${title}"`,
+      15
+    );
+    const cl=r.toLowerCase().trim().replace(/[^a-z0-9_]/g,'');
+    return allCats().map(c=>c.id).includes(cl)?cl:'other';
+  }catch{return'other';}
+}
+
+// ── SETTINGS ──
+function applySettings(){
+  document.documentElement.style.setProperty('--cols',cfg.cols);
+  document.querySelectorAll('.col-opt').forEach(b=>b.classList.toggle('active',+b.textContent===cfg.cols));
+  ['new','old','az'].forEach(s=>{const el=document.getElementById('srt-'+s);if(el)el.classList.toggle('active',cfg.sort===s);});
+  const lbl=document.getElementById('sort-lbl');
+  if(lbl)lbl.textContent='↕ '+(cfg.sort==='new'?'חדש':cfg.sort==='old'?'ישן':'א-ת');
+  // apply theme
+  const t=cfg.theme||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-opt').forEach(b=>b.classList.remove('active'));
+  const tBtn=document.getElementById('thm-'+t);
+  if(tBtn)tBtn.classList.add('active');
+}
+function setTheme(t){cfg.theme=t;saveCfg();applySettings();}
+function setCols(n){cfg.cols=n;saveCfg();applySettings();closeSettings();}
+function setSort(s){cfg.sort=s;saveCfg();applySettings();render();}
+function cycleSortMode(){const m=['new','old','az'];setSort(m[(m.indexOf(cfg.sort)+1)%3]);}
+function openSettings(){
+  const reg=videos.filter(v=>!v.isShort).length;
+  const sh=videos.filter(v=>v.isShort).length;
+  document.getElementById('stats-txt').textContent=`${reg} סרטונים · ${sh} שורטים · ${channels.length} ערוצים`;
+  applySettings();
+  const k=getKey();if(k){document.getElementById('key-input').value=k;document.getElementById('key-status').textContent='✅ מפתח שמור';document.getElementById('key-status').style.color='#26de81';}
+  renderSavedShorts();
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+function saveKey(){
+  const k=document.getElementById('key-input').value.trim();
+  if(!k){toast('נא להכניס מפתח');return;}
+  localStorage.setItem(YTK,k);
+  document.getElementById('key-status').textContent='✅ נשמר!';document.getElementById('key-status').style.color='#26de81';
+  toast('✅ המפתח נשמר!');
+}
+function deleteAll(){if(confirm('למחוק את כל הסרטונים?')){videos=[];save();render();closeSettings();}}
+
+// ── SORT ──
+function getSorted(arr){
+  const a=[...arr];
+  if(cfg.sort==='old')return a.reverse();
+  if(cfg.sort==='az')return a.sort((x,y)=>x.title.localeCompare(y.title,'he'));
+  return a;
+}
+
+// ── RENDER ──
+function renderCats(){
+  const cats=allCats();
+  const counts=Object.fromEntries(cats.map(c=>[c.id,videos.filter(v=>!v.isShort&&v.category===c.id).length]));
+  const row=document.getElementById('cats-row');
+  let h=`<button class="cat-btn${activeCat==='all'?' active':''}" onclick="setCat('all')"
+    style="${activeCat==='all'?'background:linear-gradient(135deg,#ff3864,#ff6b35);box-shadow:0 3px 14px #ff386435;':''}">
+    🎬 הכל<span class="cat-badge" style="background:${activeCat==='all'?'rgba(0,0,0,.3)':'rgba(255,56,100,.12)'};color:${activeCat==='all'?'#fff':'#ff3864'}">${videos.length}</span>
+  </button>`;
+  cats.forEach(cat=>{
+    const a=activeCat===cat.id,cnt=counts[cat.id]||0;
+    h+=`<button class="cat-btn${a?' active':''}" onclick="setCat('${cat.id}')"
+      style="${a?`background:${cat.color};box-shadow:0 3px 14px ${cat.glow};color:#000;`:''}">
+      ${cat.emoji} ${cat.label}${cnt>0?`<span class="cat-badge" style="background:${a?'rgba(0,0,0,.22)':cat.color+'18'};color:${a?'#000':cat.color}">${cnt}</span>`:''}
+    </button>`;
+  });
+  h+=`<button class="swipe-cat" onclick="openSwipe()">📺 גלילה</button>`;
+  row.innerHTML=h;
+}
+
+function renderGrid(){
+  let f=videos.filter(v=>!v.isShort&&(activeCat==='all'||v.category===activeCat)&&(!searchQ||v.title.toLowerCase().includes(searchQ.toLowerCase())));
+  f=getSorted(f);
+  const co=allCats().find(c=>c.id===activeCat);
+  document.getElementById('sec-title').textContent=activeCat==='all'?'כל הסרטונים':`${co?.emoji} ${co?.label}`;
+  document.getElementById('sec-count').textContent=`${f.length} תוצאות`;
+  const st=document.getElementById('sec-stag');
+  if(searchQ){st.textContent=`"${searchQ}"`;st.style.display='';}else st.style.display='none';
+  const grid=document.getElementById('grid'),empty=document.getElementById('empty');
+  if(!f.length){
+    grid.innerHTML='';empty.style.display='block';
+    document.getElementById('empty-h').textContent=searchQ?'לא נמצאו תוצאות':'עוד אין סרטונים';
+    document.getElementById('empty-p').textContent=searchQ?`לא מצאנו "${searchQ}"`:'לחץ על הכפתור למטה להוסיף';
+    document.getElementById('empty-dots').innerHTML=allCats().slice(0,6).map((c,i)=>
+      `<div class="empty-dot" style="background:${c.color};animation:pulse 1.8s ease-in-out ${i*.2}s infinite"></div>`).join('');
+    return;
+  }
+  empty.style.display='none';
+  grid.innerHTML=f.map((v,i)=>{
+    const cat=allCats().find(c=>c.id===v.category)||BASE[6];
+    const date=v.addedAt?new Date(v.addedAt).toLocaleDateString('he-IL',{day:'numeric',month:'short'}):'';
+    return`<div class="card" style="animation-delay:${i*.03}s">
+      <button class="card-menu-btn" onclick="toggleMenu(event,${v.id})">⋮</button>
+      <div class="card-thumb" onclick="openLB(${v.id})">
+        <img src="${thumb(v.videoId)}" alt="" loading="lazy">
+        <div class="thumb-ov"><div class="play-ic" style="background:${cat.color};box-shadow:0 3px 16px ${cat.glow}">▶</div></div>
+        <div class="card-badge" style="background:${cat.color}">${cat.emoji} ${cat.label}</div>
+        ${v.isShort?'<div class="short-badge">SHORT</div>':''}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${v.title.replace(/</g,'&lt;')}</div>
+        ${date?`<div class="card-meta"><span>📅 ${date}</span></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function render(){
+  renderCats();renderGrid();
+  if(activeTab==='shorts')renderShorts();
+  if(activeTab==='channels')renderChannels();
+  // update logo count
+  const el=document.getElementById('logo-count');
+  if(el){
+    const total=videos.length;
+    const shorts=videos.filter(v=>v.isShort).length;
+    const regular=total-shorts;
+    el.textContent=total===0?'0 סרטונים':`${regular} סרטונים · ${shorts} שורטים`;
+  }
+}
+function setCat(id){activeCat=id;closeMenus();render();}
+
+// ── MENUS ──
+let _openMenuId=null;
+function toggleMenu(e,id){
+  e.stopPropagation();
+  if(_openMenuId===id){closeMenus();return;}
+  closeMenus();
+  _openMenuId=id;
+  const fm=document.getElementById('floating-menu');
+  // build menu content based on video
+  const v=videos.find(x=>x.id===id);
+  if(!v)return;
+  const isShort=v.isShort;
+  fm.innerHTML=`
+    <button class="menu-item" onclick="openLB(${id});closeMenus()">▶ צפה</button>
+    <button class="menu-item" onclick="openSwipeSingle(${id});closeMenus()">📺 מצב גלילה</button>
+    <button class="menu-item" onclick="renameV(${id});closeMenus()">✏️ שנה שם</button>
+    ${!isShort?`<button class="menu-item" onclick="toggleFloatSub(${id})">📂 העבר לקטגוריה ▾</button>
+    <div id="fsub-${id}" style="display:none;flex-direction:column;gap:2px;padding:2px 0;">
+      ${allCats().filter(c=>c.id!==v.category).map(c=>
+        `<button class="submenu-item" onclick="moveCat(${id},'${c.id}')"><div class="s-dot" style="background:${c.color}"></div>${c.emoji} ${c.label}</button>`).join('')}
+    </div>`:''}
+    <div class="menu-sep"></div>
+    <button class="menu-item" onclick="copyV(${id});closeMenus()">🔗 העתק קישור</button>
+    <button class="menu-item" onclick="shareV(${id});closeMenus()">📤 שתף</button>
+    <button class="menu-item" onclick="openYT(${id});closeMenus()">↗ פתח ביוטיוב</button>
+    <div class="menu-sep"></div>
+    <button class="menu-item danger" onclick="delV(${id});closeMenus()">🗑 מחק סרטון</button>`;
+  // position: align to button, but flip if near bottom/right edge
+  const btn=e.currentTarget;
+  const r=btn.getBoundingClientRect();
+  fm.style.display='block';
+  fm.classList.add('open');
+  const mw=fm.offsetWidth||190,mh=fm.offsetHeight||280;
+  const vw=window.innerWidth,vh=window.innerHeight;
+  let top=r.bottom+4,left=r.left;
+  if(top+mh>vh-10)top=r.top-mh-4;
+  if(left+mw>vw-10)left=vw-mw-10;
+  if(left<6)left=6;
+  fm.style.top=top+'px';fm.style.left=left+'px';
+}
+function toggleFloatSub(id){
+  const sub=document.getElementById('fsub-'+id);
+  if(!sub)return;
+  sub.style.display=sub.style.display==='none'?'flex':'none';
+}
+function closeMenus(){
+  const fm=document.getElementById('floating-menu');
+  if(fm){fm.classList.remove('open');fm.style.display='none';fm.innerHTML='';}
+  _openMenuId=null;
+}
+document.addEventListener('click',()=>closeMenus());
+
+// ── VIDEO ACTIONS ──
+function delV(id){
+  if(curLbId===id)closeLB();
+  const v=videos.find(x=>x.id===id);
+  videos=videos.filter(x=>x.id!==id);
+  save();
+  // remove channel entirely if it has no more videos remaining in the videos array
+  if(v){
+    channels=channels.filter(ch=>{
+      if(!(ch.importedVideoIds||[]).includes(v.videoId))return true;
+      // check if this channel has any other videos still in the videos array
+      const remaining=(ch.importedVideoIds||[]).filter(vid=>vid!==v.videoId&&videos.find(x=>x.videoId===vid));
+      if(remaining.length>0){ch.importedVideoIds=ch.importedVideoIds.filter(vid=>vid!==v.videoId);return true;}
+      return false; // channel has no more videos — remove it entirely
+    });
+    saveChannels();
+  }
+  render();
+  if(activeTab==='shorts')renderShorts();
+  if(activeTab==='channels'){renderChannels();if(cvChannelId){const ch=channels.find(x=>x.id===cvChannelId);if(!ch)closeChView();else renderChViewGrid();}}
+}
+function moveCat(id,cid){videos=videos.map(v=>v.id===id?{...v,category:cid}:v);save();render();toast('✅ הועבר לקטגוריה');}
+function copyV(id){const v=videos.find(x=>x.id===id);if(!v)return;navigator.clipboard.writeText(v.url).then(()=>toast('🔗 הקישור הועתק!'));}
+function openYT(id){const v=videos.find(x=>x.id===id);if(v)window.open(v.url,'_blank');}
+function shareV(id){const v=videos.find(x=>x.id===id);if(!v)return;if(navigator.share)navigator.share({title:v.title,url:v.url});else copyV(id);}
+function renameV(id){closeMenus();const v=videos.find(x=>x.id===id);if(!v)return;const n=prompt('שנה שם:',v.title);if(n&&n.trim()){videos=videos.map(x=>x.id===id?{...x,title:n.trim()}:x);save();render();}}
+function deleteAll(){if(confirm('למחוק את כל הסרטונים והערוצים?')){videos=[];channels=[];save();saveChannels();render();if(activeTab==='channels')renderChannels();if(activeTab==='shorts')renderShorts();closeSettings();toast('🗑 הכל נמחק');}}
+
+// ── TOAST ──
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',2200);}
+
+// ── ADD FLOW ──
+function openAdd(){
+  document.getElementById('add-modal').classList.add('open');
+  goStep(1);
+  document.getElementById('in-url').value='';
+  document.getElementById('tp').style.display='none';
+  document.getElementById('add-err').classList.remove('on');
+  pVid=null;setTimeout(()=>document.getElementById('in-url').focus(),100);
+}
+function closeAdd(){document.getElementById('add-modal').classList.remove('open');}
+function goStep(n){document.getElementById('step1').style.display=n===1?'block':'none';document.getElementById('step2').style.display=n===2?'block':'none';}
+function showErr(m){document.getElementById('err-txt').textContent=m;document.getElementById('add-err').classList.add('on');}
+
+document.getElementById('in-url').addEventListener('input',async function(){
+  const vid=ytId(this.value.trim());
+  const tp=document.getElementById('tp');
+  if(!vid){tp.style.display='none';return;}
+  tp.style.display='flex';document.getElementById('tp-icon').textContent='⏳';document.getElementById('tp-text').textContent='שולף כותרת...';
+  const raw=await fetchTitle(vid);
+  if(raw){document.getElementById('tp-icon').textContent='✅';document.getElementById('tp-text').textContent=clean(raw);}
+  else{document.getElementById('tp-icon').textContent='⚠️';document.getElementById('tp-text').textContent='לא נמצאה כותרת';}
+});
+
+async function doFetch(){
+  const url=document.getElementById('in-url').value.trim();
+  document.getElementById('add-err').classList.remove('on');
+  if(!url){showErr('נא להכניס קישור');return;}
+  const vid=ytId(url);if(!vid){showErr('קישור לא תקין');return;}
+  const btn=document.getElementById('btn-fetch');btn.disabled=true;
+  btn.innerHTML='<span class="spin"><span class="spin-i">⟳</span> שולף...</span>';
+  const raw=await fetchTitle(vid)||`סרטון (${vid})`;
+  const cleaned=clean(raw);
+  btn.innerHTML='<span class="spin"><span class="spin-i">⟳</span> מתרגם...</span>';
+  const translated=await translate(cleaned);
+  pVid=vid;pUrl=url;pOrig=cleaned;pHe=translated;chosenT='he';
+  document.getElementById('txt-he').textContent=translated;
+  document.getElementById('txt-orig').textContent=cleaned;
+  document.getElementById('in-manual').value='';
+  document.querySelectorAll('.title-opt').forEach(el=>el.classList.remove('chosen'));
+  document.getElementById('opt-he').classList.add('chosen');
+  btn.disabled=false;btn.innerHTML='המשך ←';
+  goStep(2);
+}
+
+function selTitle(t){chosenT=t;document.querySelectorAll('.title-opt').forEach(el=>el.classList.remove('chosen'));document.getElementById('opt-'+t).classList.add('chosen');if(t==='manual')document.getElementById('in-manual').focus();}
+
+async function doAdd(){
+  let title='';
+  if(chosenT==='he')title=pHe;
+  else if(chosenT==='orig')title=pOrig;
+  else title=document.getElementById('in-manual').value.trim();
+  if(!title){toast('נא לבחור שם');return;}
+  const btn=document.getElementById('btn-add');btn.disabled=true;
+  btn.innerHTML='<span class="spin"><span class="spin-i">⟳</span> מוסיף...</span>';
+  const cat=await classify(title);
+  const isShort=!!pUrl.match(/\/shorts\//);
+  const newVid={id:Date.now(),title,url:pUrl,videoId:pVid,category:cat,isShort,addedAt:new Date().toISOString()};
+  videos.unshift(newVid);
+  // add notification for this new video
+  notifs.unshift({videoId:pVid,channelId:'manual',channelName:'הוספה ידנית',channelAvatar:'',title,isShort,seenAt:null,addedAt:new Date().toISOString()});
+  if(notifs.length>100)notifs=notifs.slice(0,100);
+  saveNotifs();updateBadge();
+  save();render();btn.disabled=false;btn.innerHTML='＋ הוסף';
+  closeAdd();toast(isShort?'✅ השורט נוסף!':'✅ הסרטון נוסף!');
+}
+
+// ── LIGHTBOX ──
+function openLB(id){
+  const v=videos.find(x=>x.id===id);if(!v)return;
+  const cat=allCats().find(c=>c.id===v.category)||BASE[6];
+  curLbId=id;
+  document.getElementById('lb-tag').textContent=`${cat.emoji} ${cat.label}`;
+  document.getElementById('lb-tag').style.background=cat.color;
+  document.getElementById('lb-title').textContent=v.title;
+  document.getElementById('lb-iframe').src=`https://www.youtube.com/embed/${v.videoId}?autoplay=1`;
+  document.getElementById('lb-overlay').classList.add('open');
+}
+function closeLB(){document.getElementById('lb-overlay').classList.remove('open');document.getElementById('lb-iframe').src='';curLbId=null;}
+function goFS(){const el=document.getElementById('lb-iframe');try{if(el.requestFullscreen)el.requestFullscreen();else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();}catch(e){const m=el.src.match(/embed\/([a-zA-Z0-9_-]{11})/);if(m)window.open('https://www.youtube.com/watch?v='+m[1],'_blank');}}
+
+// ── SWIPE MODE ──
+function openSwipe(){
+  let f=videos.filter(v=>activeCat==='all'||v.category===activeCat);
+  f=getSorted(f);if(!f.length){toast('אין סרטונים');return;}
+  swVids=f;swIdx=0;buildSwipe();document.getElementById('swipe-mode').classList.add('open');
+  const co=allCats().find(c=>c.id===activeCat);
+  document.getElementById('sw-title').textContent=activeCat==='all'?'כל הסרטונים':co?.label||'';
+}
+function openSwipeSingle(id){closeMenus();let f=getSorted(videos.filter(v=>activeCat==='all'||v.category===activeCat));swVids=f;swIdx=Math.max(0,f.findIndex(v=>v.id===id));buildSwipe();document.getElementById('swipe-mode').classList.add('open');}
+function closeSwipe(){document.querySelectorAll('#sw-container iframe').forEach(f=>f.src='');document.getElementById('swipe-mode').classList.remove('open');}
+
+function buildSwipe(){
+  const c=document.getElementById('sw-container');
+  // remove old items but keep dots+counter
+  c.querySelectorAll('.sw-item').forEach(el=>el.remove());
+  swVids.forEach((v,i)=>{
+    const cat=allCats().find(c=>c.id===v.category)||BASE[6];
+    const item=document.createElement('div');item.className='sw-item';
+    item.style.transform=`translateY(${(i-swIdx)*100}%)`;
+    item.innerHTML=`<iframe src="${i===swIdx?`https://www.youtube.com/embed/${v.videoId}?autoplay=1&playsinline=1`:''}"
+      allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;fullscreen"
+      allowfullscreen data-src="https://www.youtube.com/embed/${v.videoId}?autoplay=1&playsinline=1"></iframe>
+      <div class="sw-ov">
+        <div class="sw-ov-title">${v.title.replace(/</g,'&lt;')}</div>
+        <div class="sw-ov-cat" style="background:${cat.color}">${cat.emoji} ${cat.label}</div>
+      </div>`;
+    c.appendChild(item);
+  });
+  updateSwipeDots();
+  let ty=0,tx=0;
+  c.addEventListener('touchstart',e=>{ty=e.touches[0].clientY;tx=e.touches[0].clientX;},{passive:true});
+  c.addEventListener('touchend',e=>{
+    const dy=ty-e.changedTouches[0].clientY,dx=Math.abs(tx-e.changedTouches[0].clientX);
+    if(Math.abs(dy)>45&&Math.abs(dy)>dx){if(dy>0&&swIdx<swVids.length-1)goSwipe(swIdx+1);else if(dy<0&&swIdx>0)goSwipe(swIdx-1);}
+  },{passive:true});
+}
+function goSwipe(idx){
+  swIdx=idx;
+  document.querySelectorAll('#sw-container .sw-item').forEach((item,i)=>{
+    item.style.transform=`translateY(${(i-idx)*100}%)`;
+    if(i===idx){const f=item.querySelector('iframe');if(!f.src||f.src==='about:blank')f.src=f.dataset.src;}
+  });
+  updateSwipeDots();
+  document.getElementById('sw-counter').textContent=`${idx+1} / ${swVids.length}`;
+}
+function updateSwipeDots(){
+  const max=Math.min(swVids.length,9);
+  document.getElementById('sw-dots').innerHTML=Array.from({length:max},(_,i)=>
+    `<div class="sw-dot${i===swIdx?' active':''}"></div>`).join('');
+  document.getElementById('sw-counter').textContent=`${swIdx+1} / ${swVids.length}`;
+}
+
+// ── SHORTS FEED (TikTok-style) ──
+const SAVED_SHORTS_KEY='sorttube-saved-shorts';
+let sfVids=[],sfIdx=0,savedShorts=[];
+
+function loadSavedShorts(){try{savedShorts=JSON.parse(localStorage.getItem(SAVED_SHORTS_KEY)||'[]');}catch{savedShorts=[];}}
+function saveSavedShorts(){localStorage.setItem(SAVED_SHORTS_KEY,JSON.stringify(savedShorts));}
+
+function openShortsFeed(){
+  const shorts=videos.filter(v=>v.isShort);
+  if(!shorts.length){toast('אין שורטים - ייבא ערוץ עם שורטים תחילה');return;}
+  // shuffle
+  sfVids=[...shorts].sort(()=>Math.random()-.5);
+  sfIdx=0;
+  buildShortsFeed();
+  document.getElementById('shorts-feed').classList.add('open');
+}
+function closeShortsFeed(){
+  document.querySelectorAll('#sf-container iframe').forEach(f=>f.src='');
+  document.getElementById('shorts-feed').classList.remove('open');
+}
+
+function buildShortsFeed(){
+  const c=document.getElementById('sf-container');
+  c.querySelectorAll('.sf-item').forEach(el=>el.remove());
+  sfVids.forEach((v,i)=>{
+    const item=document.createElement('div');
+    item.className='sf-item';
+    item.id='sf-item-'+i;
+    item.style.transform=`translateY(${(i-sfIdx)*100}%)`;
+    const isSaved=savedShorts.some(s=>s.videoId===v.videoId);
+    // find channel for this video
+    const ch=channels.find(ch=>(ch.importedVideoIds||[]).includes(v.videoId));
+    const chUrl=ch?`https://www.youtube.com/channel/${ch.channelId||ch.id}`:'';
+    item.innerHTML=`
+      <iframe src="${i===sfIdx?`https://www.youtube.com/embed/${v.videoId}?autoplay=1&playsinline=1&loop=1&playlist=${v.videoId}`:''}"
+        allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;fullscreen"
+        allowfullscreen data-src="https://www.youtube.com/embed/${v.videoId}?autoplay=1&playsinline=1&loop=1&playlist=${v.videoId}"></iframe>
+      <div class="sf-bottom">
+        <div class="sf-vid-title">${v.title.replace(/</g,'&lt;')}</div>
+        <div class="sf-actions" style="pointer-events:all;">
+          ${chUrl?`<button class="sf-btn sf-channel-btn" onclick="window.open('${chUrl}','_blank')">📺 לערוץ</button>`:`<button class="sf-btn sf-channel-btn" onclick="window.open('https://www.youtube.com/watch?v=${v.videoId}','_blank')">▶ YouTube</button>`}
+          <button class="sf-btn sf-save-btn${isSaved?' saved':''}" id="sf-save-${v.videoId}" onclick="toggleSaveShort('${v.videoId}','${v.id}',this)">
+            ${isSaved?'✅ נשמר':'🔖 שמור'}
+          </button>
+        </div>
+      </div>`;
+    c.appendChild(item);
+  });
+  updateSfDots();
+  // touch swipe
+  let ty=0,tx=0;
+  c.ontouchstart=null;c.ontouchend=null;c.onwheel=null;
+  c.addEventListener('touchstart',e=>{ty=e.touches[0].clientY;tx=e.touches[0].clientX;},{passive:true});
+  c.addEventListener('touchend',e=>{
+    const dy=ty-e.changedTouches[0].clientY,dx=Math.abs(tx-e.changedTouches[0].clientX);
+    if(Math.abs(dy)>45&&Math.abs(dy)>dx){
+      if(dy>0&&sfIdx<sfVids.length-1)goSf(sfIdx+1);
+      else if(dy<0&&sfIdx>0)goSf(sfIdx-1);
+    }
+  },{passive:true});
+  // mouse wheel scroll
+  let wheelLock=false;
+  c.addEventListener('wheel',e=>{
+    e.preventDefault();
+    if(wheelLock)return;
+    wheelLock=true;
+    setTimeout(()=>wheelLock=false,600);
+    if(e.deltaY>0&&sfIdx<sfVids.length-1)goSf(sfIdx+1);
+    else if(e.deltaY<0&&sfIdx>0)goSf(sfIdx-1);
+  },{passive:false});
+}
+
+function goSf(idx){
+  sfIdx=idx;
+  document.querySelectorAll('#sf-container .sf-item').forEach((item,i)=>{
+    item.style.transform=`translateY(${(i-idx)*100}%)`;
+    if(i===idx){const f=item.querySelector('iframe');if(!f.src||f.src==='about:blank')f.src=f.dataset.src;}
+    else{/* pause others lazily */}
+  });
+  updateSfDots();
+}
+
+function updateSfDots(){
+  const max=Math.min(sfVids.length,9);
+  document.getElementById('sf-dots').innerHTML=Array.from({length:max},(_,i)=>
+    `<div class="sf-dot${i===sfIdx?' active':''}"></div>`).join('');
+}
+
+function toggleSaveShort(videoId,vidId,btn){
+  const already=savedShorts.some(s=>s.videoId===videoId);
+  if(already){
+    savedShorts=savedShorts.filter(s=>s.videoId!==videoId);
+    btn.className='sf-btn sf-save-btn';
+    btn.textContent='🔖 שמור';
+    toast('הוסר מהשמורים');
+  }else{
+    const v=videos.find(x=>x.videoId===videoId);
+    if(v)savedShorts.unshift({videoId:v.videoId,title:v.title,id:v.id,savedAt:new Date().toISOString()});
+    btn.className='sf-btn sf-save-btn saved';
+    btn.textContent='✅ נשמר';
+    toast('✅ נשמר!');
+  }
+  saveSavedShorts();
+}
+
+function clearSavedShorts(){
+  if(!savedShorts.length)return;
+  if(!confirm('לנקות את כל השורטים השמורים?'))return;
+  savedShorts=[];saveSavedShorts();renderSavedShorts();toast('🗑 נוקה');
+}
+
+function openSavedShortsModal(){renderSavedShorts();document.getElementById('saved-shorts-modal').classList.add('open');}
+function closeSavedShortsModal(){document.getElementById('saved-shorts-modal').classList.remove('open');}
+
+function renderSavedShorts(){
+  const list=document.getElementById('saved-shorts-list');
+  const empty=document.getElementById('saved-shorts-empty');
+  const count=document.getElementById('saved-shorts-count');
+  count.textContent=`${savedShorts.length} שורטים שמורים`;
+  if(!savedShorts.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=savedShorts.map(s=>`
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:11px;padding:10px 12px;">
+      <img src="https://img.youtube.com/vi/${s.videoId}/mqdefault.jpg" style="width:72px;height:40px;object-fit:cover;border-radius:7px;flex-shrink:0;">
+      <div style="flex:1;overflow:hidden;">
+        <div style="font-size:13px;font-weight:600;color:#ddd;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35;">${s.title.replace(/</g,'&lt;')}</div>
+        <div style="font-size:10px;color:#555;margin-top:3px;">📱 שורט · ${new Date(s.savedAt).toLocaleDateString('he-IL',{day:'numeric',month:'short'})}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+        <button onclick="window.open('https://www.youtube.com/shorts/${s.videoId}','_blank')" style="background:rgba(255,56,100,.12);border:1px solid rgba(255,56,100,.25);border-radius:8px;padding:6px 10px;color:#ff7070;font-size:12px;cursor:pointer;font-family:var(--font);font-weight:700;">▶ צפה</button>
+        <button onclick="removeSavedShort('${s.videoId}')" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:#666;font-size:11px;cursor:pointer;font-family:var(--font);">הסר</button>
+      </div>
+    </div>`).join('');
+}
+
+function removeSavedShort(videoId){
+  savedShorts=savedShorts.filter(s=>s.videoId!==videoId);
+  saveSavedShorts();renderSavedShorts();toast('הוסר');
+}
+
+// ── IMPORT ──
+function setIT(t){impType=t;document.querySelectorAll('.itype-btn').forEach(b=>b.classList.remove('active'));document.getElementById('itype-'+t).classList.add('active');}
+function openImport(){
+  const hk=!!getKey();
+  document.getElementById('imp-no-key').style.display=hk?'none':'flex';
+  document.getElementById('btn-imp').disabled=!hk;
+  document.getElementById('imp-url').value='';
+  document.getElementById('imp-progress').style.display='none';
+  document.getElementById('imp-results').innerHTML='';
+  setIT('videos');
+  document.getElementById('import-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('imp-url').focus(),100);
+}
+function closeImport(){document.getElementById('import-modal').classList.remove('open');}
+
+function parseYTUrl(url){
+  const pl=url.match(/[?&]list=([a-zA-Z0-9_-]+)/);if(pl)return{type:'playlist',id:pl[1]};
+  const h=url.match(/@([a-zA-Z0-9_.-]+)/);if(h)return{type:'handle',id:h[1]};
+  const ch=url.match(/channel\/([a-zA-Z0-9_-]+)/);if(ch)return{type:'channel',id:ch[1]};
+  const u=url.match(/(?:\/c\/|\/user\/)([a-zA-Z0-9_.-]+)/);if(u)return{type:'handle',id:u[1]};
+  return null;
+}
+async function getChanId(handle,key){const r=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(handle)}&maxResults=1&key=${key}`);const d=await r.json();return d.items?.[0]?.id?.channelId||null;}
+async function getUploadsPl(chanId,key){const r=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${chanId}&key=${key}`);const d=await r.json();return d.items?.[0]?.contentDetails?.relatedPlaylists?.uploads||null;}
+async function getPlVideos(plId,max,key){
+  const vids=[];let token='';
+  while(vids.length<max){
+    const r=await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${plId}&maxResults=${Math.min(50,max-vids.length)}&key=${key}${token?'&pageToken='+token:''}`);
+    const d=await r.json();if(d.error)throw new Error(d.error.message);
+    for(const it of(d.items||[])){
+      const vid=it.snippet?.resourceId?.videoId,title=it.snippet?.title;
+      if(vid&&title&&title!=='Private video'&&title!=='Deleted video'){
+        vids.push({videoId:vid,title,url:`https://www.youtube.com/watch?v=${vid}`,isShort:false});
+      }
+    }
+    if(d.nextPageToken&&vids.length<max)token=d.nextPageToken;else break;
+  }
+  // Fetch durations in batches of 50 to detect shorts (<=60s)
+  for(let i=0;i<vids.length;i+=50){
+    const batch=vids.slice(i,i+50).map(v=>v.videoId).join(',');
+    try{
+      const r=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${batch}&key=${key}`);
+      const d=await r.json();
+      for(const item of(d.items||[])){
+        const dur=item.contentDetails?.duration||'';
+        // Parse ISO 8601 duration — PT1M30S = 90s, PT45S = 45s
+        const m=dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+        if(m){
+          const h=parseInt(m[1]||0),mn=parseInt(m[2]||0),s=parseInt(m[3]||0);
+          const totalSec=h*3600+mn*60+s;
+          const v=vids.find(x=>x.videoId===item.id);
+          if(v)v.isShort=totalSec<=180&&totalSec>0;
+        }
+      }
+    }catch(e){console.error('duration fetch error',e);}
+  }
+  return vids;
+}
+
+async function doImport(){
+  const url=document.getElementById('imp-url').value.trim();
+  const max=parseInt(document.getElementById('imp-max').value)||20;
+  const key=getKey();
+  if(!url){toast('נא להכניס קישור');return;}
+  if(!key){toast('נא להכניס API Key בהגדרות');return;}
+  const btn=document.getElementById('btn-imp');btn.disabled=true;
+  const prog=document.getElementById('imp-progress');
+  const status=document.getElementById('imp-status');
+  const bar=document.getElementById('prog-bar');
+  const results=document.getElementById('imp-results');
+  prog.style.display='block';results.innerHTML='';
+  status.style.color='#666';
+  try{
+    const parsed=parseYTUrl(url);if(!parsed)throw new Error('קישור לא תקין');
+    status.textContent='מחפש ערוץ...';bar.style.width='10%';
+    let plId=null;
+    if(parsed.type==='playlist'){plId=parsed.id;}
+    else{
+      let chanId=parsed.id;
+      if(parsed.type==='handle'){status.textContent='שולף ערוץ...';bar.style.width='20%';chanId=await getChanId(parsed.id,key);if(!chanId)throw new Error('לא נמצא הערוץ');}
+      status.textContent='שולף פלייליסט...';bar.style.width='35%';plId=await getUploadsPl(chanId,key);if(!plId)throw new Error('לא נמצאו סרטונים');
+    }
+    status.textContent='שולף סרטונים...';bar.style.width='55%';
+    let all=await getPlVideos(plId,max*2,key);
+    // filter by type
+    if(impType==='shorts')all=all.filter(v=>v.isShort);
+    else if(impType==='videos')all=all.filter(v=>!v.isShort);
+    all=all.slice(0,max);
+    if(!all.length)throw new Error('לא נמצאו '+(impType==='shorts'?'שורטים':impType==='videos'?'סרטונים':'סרטונים')+' בערוץ זה');
+    let added=0;
+    for(let i=0;i<all.length;i++){
+      const v=all[i];const cl=clean(v.title);
+      const exists=videos.some(x=>x.videoId===v.videoId);
+      if(!exists){const cat=await classify(cl);videos.push({id:Date.now()+i,title:cl,url:v.url,videoId:v.videoId,category:cat,isShort:v.isShort,addedAt:new Date().toISOString()});added++;}
+      bar.style.width=`${55+Math.round((i+1)/all.length*40)}%`;
+      status.textContent=`${i+1}/${all.length} סרטונים...`;
+      results.innerHTML=all.slice(0,i+1).map(x=>`
+        <div class="res-item">
+          <img class="res-thumb" src="${thumb(x.videoId)}" loading="lazy">
+          <div class="res-title">${clean(x.title).replace(/</g,'&lt;')}</div>
+          <span>${x.isShort?'📱':'🎬'}</span>
+        </div>`).join('');
+      if(i%5===4)await new Promise(r=>setTimeout(r,150));
+    }
+    bar.style.width='100%';save();render();
+    status.textContent=`✅ יובאו ${added} סרטונים חדשים!`;status.style.color='#26de81';
+    toast(`✅ יובאו ${added} סרטונים!`);
+  }catch(e){status.textContent='❌ '+e.message;status.style.color='#ff5577';toast('שגיאה: '+e.message);console.error(e);}
+  btn.disabled=false;
+}
+
+// ── SEARCH ──
+document.getElementById('search').addEventListener('input',function(){searchQ=this.value;document.getElementById('s-clear').classList.toggle('on',!!searchQ);render();});
+document.getElementById('s-clear').addEventListener('click',()=>{document.getElementById('search').value='';searchQ='';document.getElementById('s-clear').classList.remove('on');render();});
+
+// ── CUSTOM CATS ──
+function openCatModal(){
+  loadCC();selE=EMOJIS[0];selC=COLORS[0];
+  document.getElementById('cat-name').value='';
+  document.getElementById('cat-err').classList.remove('on');
+  document.getElementById('emoji-grid').innerHTML=EMOJIS.map(e=>`<button class="emoji-opt${e===selE?' sel':''}" onclick="selEm('${e}')">${e}</button>`).join('');
+  document.getElementById('color-grid').innerHTML=COLORS.map(c=>`<div class="color-sw${c===selC?' sel':''}" style="background:${c}" onclick="selCo('${c}')"></div>`).join('');
+  updateCatPrev();renderCCList();
+  document.getElementById('cat-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('cat-name').focus(),100);
+}
+function closeCatModal(){document.getElementById('cat-modal').classList.remove('open');}
+function selEm(e){selE=e;document.querySelectorAll('.emoji-opt').forEach(el=>el.classList.toggle('sel',el.textContent===e));updateCatPrev();}
+function selCo(c){selC=c;document.querySelectorAll('.color-sw').forEach(el=>el.classList.toggle('sel',el.style.background===c||el.style.backgroundColor===c));updateCatPrev();}
+function updateCatPrev(){const n=document.getElementById('cat-name').value.trim()||'חדש';const p=document.getElementById('cat-prev');p.textContent=selE+' '+n;p.style.background=selC;p.style.color='#000';}
+function renderCCList(){
+  const w=document.getElementById('cc-wrap'),l=document.getElementById('cc-list');
+  if(!cc.length){w.style.display='none';return;}w.style.display='block';
+  l.innerHTML=cc.map(cat=>`<div class="cc-item">
+    <div style="width:26px;height:26px;border-radius:7px;background:${cat.color};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${cat.emoji}</div>
+    <div style="flex:1;font-size:13px;font-weight:600">${cat.label}</div>
+    <button class="cc-del" onclick="delCC('${cat.id}')">🗑</button>
+  </div>`).join('');
+}
+function delCC(id){videos=videos.map(v=>v.category===id?{...v,category:'other'}:v);save();cc=cc.filter(c=>c.id!==id);saveCC();if(activeCat===id)activeCat='all';renderCCList();render();}
+function addCC(){
+  const name=document.getElementById('cat-name').value.trim();
+  const err=document.getElementById('cat-err');err.classList.remove('on');
+  if(!name){document.getElementById('cat-err-txt').textContent='נא להכניס שם';err.classList.add('on');return;}
+  if(name.length>20){document.getElementById('cat-err-txt').textContent='שם ארוך מדי';err.classList.add('on');return;}
+  if(allCats().some(c=>c.label===name)){document.getElementById('cat-err-txt').textContent='קטגוריה כזו קיימת';err.classList.add('on');return;}
+  cc.push({id:'cc_'+Date.now(),emoji:selE,label:name,color:selC,glow:selC+'44',custom:true});
+  saveCC();document.getElementById('cat-name').value='';openCatModal();render();
+  toast('✅ קטגוריה נוספה!');
+}
+
+// ── KEYBOARD & CLOSE ──
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAdd();closeLB();closeSettings();closeCatModal();closeImport();closeMenus();}});
+['add-modal','lb-overlay','settings-modal','cat-modal','import-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){
+    if(e.target!==this)return;
+    if(id==='lb-overlay')closeLB();
+    else if(id==='settings-modal')closeSettings();
+    else if(id==='cat-modal')closeCatModal();
+    else if(id==='import-modal')closeImport();
+    else closeAdd();
+  });
+});
+
+
+// ── CHANNELS SYSTEM ──
+const CHK='sorttube-channels';
+let channels=[]; // {id, channelId, name, avatar, uploadPlaylistId, importedVideoIds:[], addedAt}
+let activeTab='videos';
+let cvChannelId=null, cvFilter='all', cvPageToken='', cvLoading=false;
+
+function loadChannels(){try{channels=JSON.parse(localStorage.getItem(CHK)||'[]');}catch{channels=[];}}
+function saveChannels(){localStorage.setItem(CHK,JSON.stringify(channels));}
+
+function switchTab(tab){
+  activeTab=tab;
+  ['videos','shorts','channels'].forEach(t=>{
+    const el=document.getElementById('tab-content-'+t);
+    if(el)el.style.display=t===tab?'block':'none';
+    const btn=document.getElementById('tab-'+t);
+    if(btn)btn.classList.toggle('active',t===tab);
+  });
+  if(tab==='videos')document.getElementById('fab-label').textContent='הוסף סרטון';
+  else if(tab==='shorts')document.getElementById('fab-label').textContent='הוסף סרטון';
+  else document.getElementById('fab-label').textContent='הוסף ערוץ';
+  if(tab==='channels')renderChannels();
+  if(tab==='shorts')renderShorts();
+}
+
+function renderShorts(){
+  let shorts=videos.filter(v=>v.isShort);
+  shorts=getSorted(shorts);
+  document.getElementById('shorts-count').textContent=`${shorts.length} שורטים`;
+  document.getElementById('shorts-sort-lbl').textContent=cfg.sort==='new'?'חדש':cfg.sort==='old'?'ישן':'א-ת';
+  const grid=document.getElementById('shorts-grid');
+  const empty=document.getElementById('shorts-empty');
+  if(!shorts.length){grid.innerHTML='';empty.style.display='block';}
+  else{
+    empty.style.display='none';
+    grid.innerHTML=shorts.map((v,i)=>{
+      const cat=allCats().find(c=>c.id===v.category)||BASE[6];
+      return`<div class="card" style="animation-delay:${i*.03}s">
+        <button class="card-menu-btn" onclick="toggleMenu(event,${v.id})">⋮</button>
+        <div class="card-thumb" onclick="openLB(${v.id})">
+          <img src="${thumb(v.videoId)}" alt="" loading="lazy">
+          <div class="thumb-ov"><div class="play-ic" style="background:${cat.color}">▶</div></div>
+          <div class="card-badge" style="background:${cat.color}">${cat.emoji} ${cat.label}</div>
+          <div class="short-badge">SHORT</div>
+        </div>
+        <div class="card-body"><div class="card-title">${v.title.replace(/</g,'&lt;')}</div></div>
+      </div>`;
+    }).join('');
+  }
+  // render channels section — only channels that still have videos in the videos array
+  const chGrid=document.getElementById('shorts-ch-grid');
+  const chEmpty=document.getElementById('shorts-ch-empty');
+  const chSection=document.getElementById('shorts-channels-section');
+  const activeChannels=channels.filter(ch=>(ch.importedVideoIds||[]).some(vid=>videos.find(v=>v.videoId===vid)));
+  if(!activeChannels.length){
+    chSection.style.display='none';
+    chGrid.innerHTML='';
+  }else{
+    chSection.style.display='block';
+    chEmpty.style.display='none';
+    chGrid.innerHTML=activeChannels.map(ch=>`
+      <div class="ch-card" onclick="switchTab('channels');setTimeout(()=>openChView('${ch.id}'),50)">
+        <img class="ch-avatar" src="${ch.avatar||''}" alt="" onerror="this.style.display='none'">
+        <div class="ch-name">${ch.name.replace(/</g,'&lt;')}</div>
+        <div class="ch-count">${(ch.importedVideoIds||[]).filter(vid=>videos.find(v=>v.videoId===vid)).length} סרטונים</div>
+      </div>`).join('');
+  }
+}
+
+function onFabClick(){
+  if(activeTab==='channels')openImport();
+  else openAdd();
+}
+
+// ── RENDER CHANNELS ──
+function renderChannels(){
+  const grid=document.getElementById('ch-grid');
+  const empty=document.getElementById('ch-empty');
+  if(!channels.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=channels.map(ch=>`
+    <div class="ch-card" onclick="openChView('${ch.id}')">
+      <button class="ch-del" onclick="event.stopPropagation();delChannel('${ch.id}')">✕</button>
+      <img class="ch-avatar" src="${ch.avatar||'https://img.youtube.com/vi/default/default.jpg'}" alt="">
+      <div class="ch-name">${ch.name.replace(/</g,'&lt;')}</div>
+      <div class="ch-count">${ch.importedVideoIds?.length||0} סרטונים מיובאים</div>
+    </div>`).join('');
+}
+
+function delChannel(id){
+  if(!confirm('למחוק את הערוץ? הסרטונים יישארו באוסף.'))return;
+  channels=channels.filter(c=>c.id!==id);saveChannels();renderChannels();
+}
+
+// ── CHANNEL VIEW ──
+function openChView(chId){
+  cvChannelId=chId;cvFilter='all';cvPageToken='';
+  const ch=channels.find(x=>x.id===chId);if(!ch)return;
+  document.getElementById('ch-main').style.display='none';
+  document.getElementById('ch-view').style.display='block';
+  document.getElementById('cv-avatar').src=ch.avatar||'';
+  document.getElementById('cv-name').textContent=ch.name;
+  document.getElementById('cv-sub').textContent=`${ch.importedVideoIds?.length||0} סרטונים מיובאים`;
+  setCvFilter('all');
+  renderChViewGrid();
+}
+
+function closeChView(){
+  document.getElementById('ch-view').style.display='none';
+  document.getElementById('ch-main').style.display='block';
+  cvChannelId=null;
+}
+
+function setCvFilter(f){
+  cvFilter=f;
+  ['all','videos','shorts'].forEach(x=>{const el=document.getElementById('cvf-'+x);if(el)el.classList.toggle('active',x===f);});
+  renderChViewGrid();
+}
+
+function renderChViewGrid(){
+  const ch=channels.find(x=>x.id===cvChannelId);if(!ch)return;
+  const imported=ch.importedVideoIds||[];
+  let vids=videos.filter(v=>imported.includes(v.videoId));
+  if(cvFilter==='shorts')vids=vids.filter(v=>v.isShort);
+  else if(cvFilter==='videos')vids=vids.filter(v=>!v.isShort);
+  vids=getSorted(vids);
+  const grid=document.getElementById('cv-grid');
+  if(!vids.length){grid.innerHTML='<div style="text-align:center;padding:40px 20px;color:#444;font-size:13px;">אין סרטונים בקטגוריה זו</div>';return;}
+  grid.innerHTML=vids.map((v,i)=>{
+    const cat=allCats().find(c=>c.id===v.category)||BASE[6];
+    return`<div class="card" style="animation-delay:${i*.03}s">
+      <button class="card-menu-btn" onclick="toggleMenu(event,${v.id})">⋮</button>
+      <div class="card-thumb" onclick="openLB(${v.id})">
+        <img src="${thumb(v.videoId)}" alt="" loading="lazy">
+        <div class="thumb-ov"><div class="play-ic" style="background:${cat.color};box-shadow:0 3px 16px ${cat.glow}">▶</div></div>
+        <div class="card-badge" style="background:${cat.color}">${cat.emoji} ${cat.label}</div>
+        ${v.isShort?'<div class="short-badge">SHORT</div>':''}
+      </div>
+      <div class="card-body"><div class="card-title">${v.title.replace(/</g,'&lt;')}</div></div>
+    </div>`;
+  }).join('');
+  // show load more if channel has a playlist
+  document.getElementById('cv-load-more').style.display=ch.uploadPlaylistId?'block':'none';
+}
+
+async function loadMoreChVideos(){
+  const ch=channels.find(x=>x.id===cvChannelId);if(!ch||!ch.uploadPlaylistId)return;
+  const key=getKey();if(!key){toast('צריך API Key בהגדרות');return;}
+  if(cvLoading)return;cvLoading=true;
+  const btn=document.getElementById('cv-load-more');btn.textContent='⏳ טוען...';btn.disabled=true;
+  try{
+    // get current imported ids to skip them
+    const existing=new Set(ch.importedVideoIds||[]);
+    // fetch next batch
+    const impModal=document.getElementById('import-modal');
+    toast('⏳ טוען סרטונים נוספים...');
+    let token=ch.nextPageToken||'';
+    let newVids=[];let tries=0;
+    while(newVids.length<20&&tries<5){
+      tries++;
+      const r=await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${ch.uploadPlaylistId}&maxResults=50&key=${key}${token?'&pageToken='+token:''}`);
+      const d=await r.json();if(d.error)throw new Error(d.error.message);
+      for(const it of(d.items||[])){
+        const vid=it.snippet?.resourceId?.videoId,title=it.snippet?.title;
+        if(vid&&title&&!existing.has(vid)&&title!=='Private video'&&title!=='Deleted video')
+          newVids.push({videoId:vid,title,url:`https://www.youtube.com/watch?v=${vid}`,isShort:false});
+      }
+      token=d.nextPageToken||'';ch.nextPageToken=token;
+      if(!token)break;
+    }
+    // fetch durations
+    if(newVids.length){
+      for(let i=0;i<newVids.length;i+=50){
+        const batch=newVids.slice(i,i+50).map(v=>v.videoId).join(',');
+        try{const r=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${batch}&key=${key}`);
+          const d=await r.json();
+          for(const item of(d.items||[])){
+            const dur=item.contentDetails?.duration||'';
+            const m=dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+            if(m){const h=parseInt(m[1]||0),mn=parseInt(m[2]||0),s=parseInt(m[3]||0);
+              const ts=h*3600+mn*60+s;const v=newVids.find(x=>x.videoId===item.id);
+              if(v)v.isShort=ts<=180&&ts>0;}}}catch(e){}
+      }
+      for(const v of newVids){
+        const cl=clean(v.title);const cat=await classify(cl);
+        videos.push({id:Date.now()+Math.random(),title:cl,url:v.url,videoId:v.videoId,category:cat,isShort:v.isShort,addedAt:new Date().toISOString()});
+        ch.importedVideoIds.push(v.videoId);
+      }
+      save();saveChannels();renderChViewGrid();
+      document.getElementById('cv-sub').textContent=`${ch.importedVideoIds.length} סרטונים מיובאים`;
+      toast(`✅ נוספו ${newVids.length} סרטונים!`);
+    }else{toast('אין סרטונים חדשים לטעון');ch.nextPageToken='';}
+    saveChannels();
+  }catch(e){toast('שגיאה: '+e.message);console.error(e);}
+  cvLoading=false;btn.textContent='⬇ טען עוד סרטונים';btn.disabled=false;
+}
+
+// ── UPDATE doImport TO SAVE CHANNEL ──
+async function doImportWithChannel(){
+  const url=document.getElementById('imp-url').value.trim();
+  const max=parseInt(document.getElementById('imp-max').value)||20;
+  const key=getKey();
+  if(!url){toast('נא להכניס קישור');return;}
+  if(!key){toast('נא להכניס API Key בהגדרות');return;}
+  const btn=document.getElementById('btn-imp');btn.disabled=true;
+  const prog=document.getElementById('imp-progress');
+  const status=document.getElementById('imp-status');
+  const bar=document.getElementById('prog-bar');
+  const results=document.getElementById('imp-results');
+  prog.style.display='block';results.innerHTML='';status.style.color='#666';
+  try{
+    const parsed=parseYTUrl(url);if(!parsed)throw new Error('קישור לא תקין');
+    status.textContent='מחפש ערוץ...';bar.style.width='10%';
+    let plId=null,chanId=null,chanName='',chanAvatar='';
+
+    if(parsed.type==='playlist'){
+      plId=parsed.id;
+      // try get playlist info
+      try{const r=await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${plId}&key=${key}`);
+        const d=await r.json();chanName=d.items?.[0]?.snippet?.title||'פלייליסט';}catch{}
+    } else {
+      chanId=parsed.id;
+      if(parsed.type==='handle'){
+        status.textContent='שולף ערוץ...';bar.style.width='20%';
+        chanId=await getChanId(parsed.id,key);if(!chanId)throw new Error('לא נמצא הערוץ');
+      }
+      status.textContent='שולף פרטי ערוץ...';bar.style.width='30%';
+      // get channel info
+      try{const r=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id=${chanId}&key=${key}`);
+        const d=await r.json();
+        const sn=d.items?.[0]?.snippet;
+        chanName=sn?.title||'ערוץ';
+        chanAvatar=sn?.thumbnails?.default?.url||sn?.thumbnails?.medium?.url||'';
+        plId=d.items?.[0]?.contentDetails?.relatedPlaylists?.uploads||null;
+      }catch(e){console.error(e);}
+      if(!plId){plId=await getUploadsPl(chanId,key);}
+      if(!plId)throw new Error('לא נמצאו סרטונים');
+    }
+
+    status.textContent='שולף סרטונים...';bar.style.width='45%';
+    // find existing channel record
+    let chRec=channels.find(x=>x.channelId===chanId||(parsed.type==='playlist'&&x.uploadPlaylistId===plId));
+    const existingIds=new Set(chRec?.importedVideoIds||[]);
+
+    // Smart fetch: keep fetching pages until we have exactly 'max' of the right type
+    const isAll=max>=9999;
+    let filtered=[];
+    let pageToken='';
+    let totalFetched=0;
+    const BATCH=50;
+    status.textContent='שולף וסורק סרטונים...';
+    while(filtered.length<max||isAll){
+      const r=await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${plId}&maxResults=${BATCH}&key=${key}${pageToken?'&pageToken='+pageToken:''}`);
+      const d=await r.json();if(d.error)throw new Error(d.error.message);
+      const items=d.items||[];
+      const batch=[];
+      for(const it of items){
+        const vid=it.snippet?.resourceId?.videoId,title=it.snippet?.title;
+        if(vid&&title&&!existingIds.has(vid)&&title!=='Private video'&&title!=='Deleted video')
+          batch.push({videoId:vid,title,url:`https://www.youtube.com/watch?v=${vid}`,isShort:false});
+      }
+      // fetch durations for this batch
+      if(batch.length){
+        try{
+          const ids=batch.map(v=>v.videoId).join(',');
+          const dr=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${ids}&key=${key}`);
+          const dd=await dr.json();
+          for(const item of(dd.items||[])){
+            const dur=item.contentDetails?.duration||'';
+            const m=dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+            if(m){const h=parseInt(m[1]||0),mn=parseInt(m[2]||0),s=parseInt(m[3]||0);
+              const ts=h*3600+mn*60+s;const v=batch.find(x=>x.videoId===item.id);
+              if(v)v.isShort=ts<=180&&ts>0;}
+          }
+        }catch(e){console.error('dur error',e);}
+      }
+      totalFetched+=batch.length;
+      // filter by type and add
+      for(const v of batch){
+        if(impType==='shorts'&&!v.isShort)continue;
+        if(impType==='videos'&&v.isShort)continue;
+        filtered.push(v);
+        if(!isAll&&filtered.length>=max)break;
+      }
+      status.textContent=`סרק ${totalFetched} סרטונים, מצא ${filtered.length}/${isAll?'∞':max}...`;
+      bar.style.width=`${45+Math.min(25,filtered.length/(isAll?100:max)*25)}%`;
+      pageToken=d.nextPageToken||'';
+      if(!pageToken)break; // no more pages
+      if(!isAll&&filtered.length>=max)break;
+    }
+    if(!filtered.length)throw new Error(existingIds.size>0?'כבר ייבאת את כל הסרטונים האלה — לחץ "טען עוד" בערוץ':'לא נמצאו סרטונים מהסוג שבחרת');
+
+    status.textContent=`מעבד ${filtered.length} סרטונים...`;bar.style.width='70%';
+    const newVideoIds=[];
+    for(let i=0;i<filtered.length;i++){
+      const v=filtered[i];const cl=clean(v.title);
+      const cat=await classify(cl);
+      videos.push({id:Date.now()+i,title:cl,url:v.url,videoId:v.videoId,category:cat,isShort:v.isShort,addedAt:new Date().toISOString()});
+      newVideoIds.push(v.videoId);
+      bar.style.width=`${70+Math.round((i+1)/filtered.length*25)}%`;
+      status.textContent=`${i+1}/${filtered.length}...`;
+      results.innerHTML=filtered.slice(0,i+1).map(x=>`
+        <div class="res-item">
+          <img class="res-thumb" src="${thumb(x.videoId)}" loading="lazy">
+          <div class="res-title">${clean(x.title).replace(/</g,'&lt;')}</div>
+          <span>${x.isShort?'📱':'🎬'}</span>
+        </div>`).join('');
+      if(i%5===4)await new Promise(r=>setTimeout(r,100));
+    }
+
+    // update/create channel record
+    if(chRec){
+      chRec.importedVideoIds=[...(chRec.importedVideoIds||[]),...newVideoIds];
+      if(chanName)chRec.name=chanName;if(chanAvatar)chRec.avatar=chanAvatar;
+    } else {
+      channels.push({id:'ch_'+Date.now(),channelId:chanId||plId,uploadPlaylistId:plId,name:chanName||'ערוץ',avatar:chanAvatar,importedVideoIds:newVideoIds,addedAt:new Date().toISOString()});
+    }
+
+    // add notifications only for newly added videos
+    const finalChRec=chRec||channels[channels.length-1];
+    for(const v of filtered){
+      const addedVid=videos.find(x=>x.videoId===v.videoId);
+      if(!addedVid)continue;
+      notifs.unshift({videoId:v.videoId,channelId:finalChRec.id,channelName:chanName||'ערוץ',channelAvatar:chanAvatar||'',title:addedVid.title,isShort:v.isShort,seenAt:null,addedAt:new Date().toISOString()});
+    }
+    if(notifs.length>100)notifs=notifs.slice(0,100);
+    saveNotifs();updateBadge();
+
+    bar.style.width='100%';save();saveChannels();render();
+    status.textContent=`✅ יובאו ${filtered.length} סרטונים חדשים!`;status.style.color='#26de81';
+    toast(`✅ יובאו ${filtered.length} סרטונים!`);
+    if(activeTab==='channels')renderChannels();
+  }catch(e){status.textContent='❌ '+e.message;status.style.color='#ff5577';toast('שגיאה: '+e.message);console.error(e);}
+  btn.disabled=false;
+}
+
+
+// ── NOTIFICATIONS SYSTEM ──
+const NK='sorttube-notifs'; // {videoId, channelId, channelName, channelAvatar, title, isShort, seenAt:null, addedAt}
+let notifs=[];
+
+function loadNotifs(){try{notifs=JSON.parse(localStorage.getItem(NK)||'[]');}catch{notifs=[];}}
+function saveNotifs(){localStorage.setItem(NK,JSON.stringify(notifs));}
+
+function getUnseenCount(){return notifs.filter(n=>!n.seenAt).length;}
+
+function updateBadge(){
+  const count=getUnseenCount();
+  const badge=document.getElementById('notif-badge');
+  if(!badge)return;
+  badge.textContent=count>99?'99+':count;
+  badge.classList.toggle('show',count>0);
+}
+
+function openNotifPanel(){
+  document.getElementById('notif-panel').classList.add('open');
+  document.getElementById('np-overlay').classList.add('open');
+  renderNotifPanel();
+  // mark all as seen after 1s
+  setTimeout(()=>{
+    notifs=notifs.map(n=>({...n,seenAt:n.seenAt||new Date().toISOString()}));
+    saveNotifs();updateBadge();
+  },1000);
+}
+function closeNotifPanel(){
+  document.getElementById('notif-panel').classList.remove('open');
+  document.getElementById('np-overlay').classList.remove('open');
+}
+function clearNotifs(){
+  if(!confirm('לנקות את כל ההתראות?'))return;
+  notifs=[];saveNotifs();updateBadge();renderNotifPanel();
+}
+
+function renderNotifPanel(){
+  const list=document.getElementById('np-list');
+  if(!notifs.length){list.innerHTML='<div class="np-empty">אין התראות חדשות 🔕</div>';return;}
+  // group by channel
+  const byChannel={};
+  for(const n of notifs){
+    if(!byChannel[n.channelId])byChannel[n.channelId]={name:n.channelName,avatar:n.channelAvatar,items:[]};
+    byChannel[n.channelId].items.push(n);
+  }
+  list.innerHTML=Object.entries(byChannel).map(([chId,ch])=>`
+    <div class="np-group">
+      <div class="np-ch-name">
+        ${ch.avatar?`<img class="np-ch-avatar" src="${ch.avatar}" alt="">`:''}
+        ${ch.name.replace(/</g,'&lt;')}
+        <span style="color:#444">(${ch.items.length})</span>
+      </div>
+      ${ch.items.map(n=>`
+        <div class="np-item${!n.seenAt?' new':''}" onclick="onNotifClick('${n.videoId}')">
+          <img class="np-thumb" src="https://img.youtube.com/vi/${n.videoId}/mqdefault.jpg" loading="lazy">
+          <div class="np-info">
+            <div class="np-vid-title">${n.title.replace(/</g,'&lt;')}</div>
+            <div class="np-vid-meta">${n.isShort?'📱 שורט':'🎬 סרטון'} · ${new Date(n.addedAt).toLocaleDateString('he-IL')}</div>
+          </div>
+          ${!n.seenAt?'<div class="np-new-dot"></div>':''}
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function onNotifClick(videoId){
+  const v=videos.find(x=>x.videoId===videoId);
+  if(v){closeNotifPanel();openLB(v.id);}
+  else{window.open('https://www.youtube.com/watch?v='+videoId,'_blank');}
+}
+
+// ── AUTO CHECK ON APP OPEN ──
+async function autoCheckNewVideos(){
+  const key=getKey();
+  if(!key||!channels.length)return;
+  const checking=document.getElementById('np-checking');
+  if(checking)checking.style.display='flex';
+  let totalNew=0;
+  for(const ch of channels){
+    if(!ch.uploadPlaylistId)continue;
+    const existingIds=new Set(ch.importedVideoIds||[]);
+    try{
+      // fetch only first page (most recent)
+      const r=await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${ch.uploadPlaylistId}&maxResults=10&key=${key}`);
+      const d=await r.json();if(d.error)continue;
+      const newItems=[];
+      for(const it of(d.items||[])){
+        const vid=it.snippet?.resourceId?.videoId,title=it.snippet?.title;
+        if(vid&&title&&!existingIds.has(vid)&&title!=='Private video'&&title!=='Deleted video')
+          newItems.push({videoId:vid,title,url:`https://www.youtube.com/watch?v=${vid}`,isShort:false});
+      }
+      if(!newItems.length)continue;
+      // fetch durations
+      const ids=newItems.map(v=>v.videoId).join(',');
+      try{
+        const dr=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${ids}&key=${key}`);
+        const dd=await dr.json();
+        for(const item of(dd.items||[])){
+          const dur=item.contentDetails?.duration||'';
+          const m=dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+          if(m){const h=parseInt(m[1]||0),mn=parseInt(m[2]||0),s=parseInt(m[3]||0);
+            const ts=h*3600+mn*60+s;const v=newItems.find(x=>x.videoId===item.id);
+            if(v)v.isShort=ts<=180&&ts>0;}
+        }
+      }catch(e){}
+      // add to videos and notifications
+      for(const v of newItems){
+        const cl=clean(v.title);
+        const cat=await classify(cl);
+        videos.unshift({id:Date.now()+Math.random(),title:cl,url:v.url,videoId:v.videoId,category:cat,isShort:v.isShort,addedAt:new Date().toISOString()});
+        ch.importedVideoIds.push(v.videoId);
+        notifs.unshift({videoId:v.videoId,channelId:ch.id,channelName:ch.name,channelAvatar:ch.avatar||'',title:cl,isShort:v.isShort,seenAt:null,addedAt:new Date().toISOString()});
+        totalNew++;
+      }
+      // keep last 100 notifs
+      if(notifs.length>100)notifs=notifs.slice(0,100);
+    }catch(e){console.error('auto-check error for channel',ch.name,e);}
+  }
+  if(totalNew>0){save();saveChannels();saveNotifs();render();}
+  if(checking)checking.style.display='none';
+  updateBadge();
+  if(totalNew>0)toast(`🔔 ${totalNew} סרטונים חדשים!`);
+}
+
+loadCC();loadCfg();loadChannels();loadNotifs();load();loadSavedShorts();applySettings();render();
+updateBadge();
+// auto check on open (with small delay so app loads first)
+setTimeout(()=>autoCheckNewVideos(),1500);
+
+// Swipe between tabs on mobile
+(()=>{
+  let tx=0,ty=0;
+  const tabs=['videos','shorts','channels'];
+  document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    // only if no modal open and not in swipe mode
+    if(document.querySelector('.overlay.open')||document.getElementById('swipe-mode').classList.contains('open'))return;
+    const dx=tx-e.changedTouches[0].clientX;
+    const dy=Math.abs(ty-e.changedTouches[0].clientY);
+    if(Math.abs(dx)>60&&dy<40){
+      const idx=tabs.indexOf(activeTab);
+      if(dx>0&&idx<tabs.length-1)switchTab(tabs[idx+1]);
+      else if(dx<0&&idx>0)switchTab(tabs[idx-1]);
+    }
+  },{passive:true});
+})();
+</script>
+</body>
+</html>
